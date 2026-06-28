@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memória de Cálculo — Duo Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --amarelo: #fed205;
+      --amarelo-dim: rgba(254,210,5,0.12);
+      --amarelo-border: rgba(254,210,5,0.3);
+      --fundo: #111111;
+      --card: #1a1a1a;
+      --card2: #222222;
+      --borda: rgba(255,255,255,0.08);
+      --texto: #f0f0f0;
+      --muted: #707070;
+      --verde: #00c853;
+      --verde-dim: rgba(0,200,83,0.12);
+      --vermelho: #ff3b3b;
+      --vermelho-dim: rgba(255,59,59,0.12);
+      --laranja: #ff8c00;
+      --laranja-dim: rgba(255,140,0,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: 'Roboto', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 0% 100%, rgba(254,210,5,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 0%, rgba(254,210,5,0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(254,210,5,0.08) 0%, transparent 45%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      padding: 40px 0 32px;
+    }
+    .logo-img { height: 52px; margin-bottom: 12px; }
+    .header-titulo {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: #fff;
+    }
+    .header-titulo span { color: var(--amarelo); font-style: italic; }
+    .header-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 22px;
+    }
+    .card-titulo {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* CAMPOS */
+    .campo { margin-bottom: 14px; }
+    .campo:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    select, input[type=number] {
+      width: 100%;
+      background: var(--card2);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      color: var(--texto);
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color .2s;
+      -webkit-appearance: none;
+    }
+    select:focus, input[type=number]:focus {
+      border-color: var(--amarelo);
+    }
+    select option { background: #1a1a1a; }
+
+    .campo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* STATUS */
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      margin-bottom: 16px;
+    }
+    .status-bloqueado { background: var(--vermelho-dim); color: var(--vermelho); border-color: rgba(255,59,59,.3); }
+    .status-minimo    { background: var(--laranja-dim);  color: var(--laranja);  border-color: rgba(255,140,0,.3); }
+    .status-bom       { background: var(--verde-dim);    color: var(--verde);    border-color: rgba(0,200,83,.3); }
+    .status-otimo     { background: rgba(0,200,83,.18);  color: var(--verde);    border-color: rgba(0,200,83,.4); }
+    .status-maximo    { background: var(--amarelo-dim);  color: var(--amarelo);  border-color: var(--amarelo-border); }
+    .status-vazio     { background: var(--card2); color: var(--muted); border-color: var(--borda); font-size: 12px; }
+
+    /* MÉTRICAS */
+    .metricas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .metrica {
+      background: var(--card2);
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .metrica-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+    .metrica-valor { font-size: 22px; font-weight: 700; color: #fff; }
+    .metrica-valor.amarelo { color: var(--amarelo); }
+    .metrica-valor.verde   { color: var(--verde); }
+    .metrica-valor.vermelho { color: var(--vermelho); }
+
+    /* PASSOS */
+    .passo {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--borda);
+    }
+    .passo:last-child { border-bottom: none; }
+    .passo-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--amarelo-dim);
+      border: 1px solid var(--amarelo-border);
+      color: var(--amarelo);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .passo-body { flex: 1; }
+    .passo-label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .passo-valor { font-size: 15px; font-weight: 500; color: var(--texto); }
+    .passo-formula { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: monospace; opacity: .8; }
+    .passo-valor.destaque { color: var(--amarelo); font-size: 17px; }
+    .passo-valor.verde { color: var(--verde); }
+    .passo-valor.vermelho { color: var(--vermelho); }
+
+    /* FULL WIDTH */
+    .full { grid-column: 1 / -1; }
+
+    /* RODAPÉ */
+    .rodape {
+      text-align: center;
+      padding-top: 32px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .rodape a { color: var(--amarelo); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .metricas { grid-template-columns: 1fr 1fr; }
+      .campo-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header">
+    <img class="logo-img" src="assets/Logo sem fundo.png" alt="Duo Fitness" onerror="this.style.display='none'">
+    <h1 class="header-titulo">Memória de Cálculo <span>Duo Fitness</span></h1>
+    <p class="header-sub">Entenda passo a passo como chegamos nos valores da proposta</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- PARÂMETROS -->
+    <div class="card">
+      <div class="card-titulo">Parâmetros da proposta</div>
+
+      <div class="campo-grid">
+        <div class="campo">
+          <label>Combo</label>
+          <select id="combo">
+            <option value="UNO">UNO</option>
+            <option value="DUO" selected>DUO</option>
+            <option value="TRIPLE">TRIPLE</option>
+            <option value="PRIME">PRIME</option>
+            <option value="ELITE">ELITE</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Prazo</label>
+          <select id="prazo">
+            <option value="36">36 meses</option>
+            <option value="48">48 meses</option>
+            <option value="60" selected>60 meses</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Container</label>
+        <select id="container">
+          <option value="SIM">Sim — usamos nosso container</option>
+          <option value="NAO">Não — condomínio tem espaço</option>
+        </select>
+      </div>
+
+      <div class="campo-grid">
+        <div class="campo">
+          <label>Nº de unidades</label>
+          <input type="number" id="aptos" value="100" min="1" placeholder="100">
+        </div>
+        <div class="campo">
+          <label>Valor/unidade (R$)</label>
+          <input type="number" id="vapo" value="15" min="0" step="0.5" placeholder="0,00">
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="card">
+      <div class="card-titulo">Resultado</div>
+      <div id="statusBadge" class="status-badge status-vazio">Preencha os campos</div>
+      <div class="metricas">
+        <div class="metrica">
+          <div class="metrica-label">Mensalidade do condomínio</div>
+          <div class="metrica-valor amarelo" id="mensCond">—</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-label">Mínimo por unidade</div>
+          <div class="metrica-valor" id="minUnit">—</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-label">Sua premiação</div>
+          <div class="metrica-valor verde" id="premiacao">—</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-label">% acima do mínimo</div>
+          <div class="metrica-valor" id="pctAcima">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSOS -->
+    <div class="card full">
+      <div class="card-titulo">Como chegamos nesses valores — passo a passo</div>
+
+      <div class="passo">
+        <div class="passo-num">1</div>
+        <div class="passo-body">
+          <div class="passo-label">Mensalidade base do combo (preço de tabela)</div>
+          <div class="passo-valor" id="s1">—</div>
+          <div class="passo-formula" id="s1f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">2</div>
+        <div class="passo-body">
+          <div class="passo-label">Desconto do aluguel do container (se condomínio tem espaço próprio)</div>
+          <div class="passo-valor" id="s2">—</div>
+          <div class="passo-formula" id="s2f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">3</div>
+        <div class="passo-body">
+          <div class="passo-label">Mensalidade mínima para a Duo Fitness não ter prejuízo</div>
+          <div class="passo-valor" id="s3">—</div>
+          <div class="passo-formula" id="s3f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">4</div>
+        <div class="passo-body">
+          <div class="passo-label">Valor mínimo por unidade</div>
+          <div class="passo-valor" id="s4">—</div>
+          <div class="passo-formula" id="s4f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">5</div>
+        <div class="passo-body">
+          <div class="passo-label">Mensalidade total negociada</div>
+          <div class="passo-valor" id="s5">—</div>
+          <div class="passo-formula" id="s5f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">6</div>
+        <div class="passo-body">
+          <div class="passo-label">Valor total do contrato (todos os meses somados)</div>
+          <div class="passo-valor" id="s6">—</div>
+          <div class="passo-formula" id="s6f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">7</div>
+        <div class="passo-body">
+          <div class="passo-label">Mínimo que a Duo Fitness precisa receber no contrato todo</div>
+          <div class="passo-valor" id="s7">—</div>
+          <div class="passo-formula" id="s7f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">8</div>
+        <div class="passo-body">
+          <div class="passo-label">Quanto o contrato supera o mínimo (lucro extra gerado)</div>
+          <div class="passo-valor" id="s8">—</div>
+          <div class="passo-formula" id="s8f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">9</div>
+        <div class="passo-body">
+          <div class="passo-label">Comissão base (0,5% do valor total do contrato)</div>
+          <div class="passo-valor" id="s9">—</div>
+          <div class="passo-formula" id="s9f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">10</div>
+        <div class="passo-body">
+          <div class="passo-label">Comissão bônus (1,5% do lucro extra)</div>
+          <div class="passo-valor" id="s10">—</div>
+          <div class="passo-formula" id="s10f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">11</div>
+        <div class="passo-body">
+          <div class="passo-label">Comissão total (base + bônus)</div>
+          <div class="passo-valor" id="s11">—</div>
+          <div class="passo-formula" id="s11f"></div>
+        </div>
+      </div>
+
+      <div class="passo">
+        <div class="passo-num">12</div>
+        <div class="passo-body">
+          <div class="passo-label">Sua premiação — 25% da comissão total</div>
+          <div class="passo-valor destaque" id="s12">—</div>
+          <div class="passo-formula" id="s12f"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="rodape">
+    Duo Fitness · Suporte: <a href="mailto:atendimento@agencialumno.com.br">atendimento@agencialumno.com.br</a>
+  </div>
+</div>
+
+<script>
+const COMBOS = {
+  UNO:    { mens: 4500,  alu: 1200 },
+  DUO:    { mens: 7200,  alu: 1800 },
+  TRIPLE: { mens: 10200, alu: 2400 },
+  PRIME:  { mens: 13500, alu: 3000 },
+  ELITE:  { mens: 17000, alu: 3600 },
+};
+const BASE = 0.005, BONUS = 0.015, CSS_SPLIT = 0.25;
+
+function fmt(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function set(id, txt, cls) {
+  const el = document.getElementById(id);
+  el.textContent = txt;
+  if (cls) el.className = 'passo-valor ' + cls;
+}
+
+function setf(id, txt) {
+  document.getElementById(id).textContent = txt;
+}
+
+function calcular() {
+  const combo  = document.getElementById('combo').value;
+  const cont   = document.getElementById('container').value;
+  const prazo  = parseInt(document.getElementById('prazo').value);
+  const aptos  = parseFloat(document.getElementById('aptos').value) || 0;
+  const vApto  = parseFloat(document.getElementById('vapo').value) || 0;
+
+  const d = COMBOS[combo];
+  const temDesconto = cont === 'NAO';
+  const mensCli = d.mens - (temDesconto ? d.alu : 0);
+  const recLiq  = d.mens - d.alu;
+  const minApto = aptos > 0 ? mensCli / aptos : 0;
+  const mensNeg = vApto * aptos;
+  const contNeg = mensNeg * prazo;
+  const contMin = recLiq * prazo;
+  const extra   = Math.max(0, contNeg - contMin);
+  const comBase  = contNeg * BASE;
+  const comBonus = extra * BONUS;
+  const comTotal = comBase + comBonus;
+  const comCSS   = comTotal * CSS_SPLIT;
+  const pct = minApto > 0 ? vApto / minApto - 1 : 0;
+  const bloqueado = vApto > 0 && minApto > 0 && vApto < minApto;
+
+  // Status
+  let statusClass, statusTxt;
+  if (!vApto || aptos === 0) {
+    statusClass = 'status-vazio'; statusTxt = 'Preencha os campos para simular';
+  } else if (bloqueado) {
+    statusClass = 'status-bloqueado'; statusTxt = '❌ Bloqueado — valor abaixo do mínimo para este combo';
+  } else if (pct < 0.05) {
+    statusClass = 'status-minimo'; statusTxt = '⚠ No mínimo — premiação mínima. Tente subir o valor!';
+  } else if (pct < 0.15) {
+    statusClass = 'status-bom'; statusTxt = '✔ Bom negócio — aprovado! Ainda há margem para crescer.';
+  } else if (pct < 0.25) {
+    statusClass = 'status-otimo'; statusTxt = '🚀 Ótimo negócio — excelente! Premiação crescendo.';
+  } else {
+    statusClass = 'status-maximo'; statusTxt = '⭐ Máximo — premiação no topo!';
+  }
+  const bar = document.getElementById('statusBadge');
+  bar.className = 'status-badge ' + statusClass;
+  bar.textContent = statusTxt;
+
+  // Métricas
+  document.getElementById('mensCond').textContent = vApto && aptos ? fmt(mensNeg) : '—';
+  document.getElementById('minUnit').textContent  = minApto ? fmt(minApto) : '—';
+  document.getElementById('premiacao').textContent = bloqueado ? 'R$ 0,00' : (comCSS ? fmt(comCSS) : '—');
+  document.getElementById('premiacao').className = 'metrica-valor ' + (bloqueado ? 'vermelho' : 'verde');
+  document.getElementById('pctAcima').textContent = minApto && vApto ? (pct * 100).toFixed(1) + '%' : '—';
+  document.getElementById('pctAcima').className = 'metrica-valor ' + (bloqueado ? 'vermelho' : pct >= 0.25 ? 'amarelo' : 'verde');
+
+  // Passos
+  set('s1', fmt(d.mens));
+  setf('s1f', `Combo ${combo}: mensalidade cheia de tabela`);
+
+  set('s2', temDesconto ? `− ${fmt(d.alu)} (desconto aplicado)` : 'Sem desconto — container incluso no contrato');
+  setf('s2f', temDesconto
+    ? `${fmt(d.mens)} − ${fmt(d.alu)} = ${fmt(mensCli)}`
+    : `Condomínio usa o container da Duo Fitness → mensalidade permanece ${fmt(d.mens)}`);
+
+  set('s3', fmt(recLiq));
+  setf('s3f', `${fmt(d.mens)} − ${fmt(d.alu)} = ${fmt(recLiq)} (valor fixo por combo, independente do container)`);
+
+  set('s4', minApto ? fmt(minApto) : '—');
+  setf('s4f', aptos ? `${fmt(mensCli)} ÷ ${aptos} unidades = ${fmt(minApto)}/unidade` : '');
+
+  set('s5', mensNeg ? fmt(mensNeg) : '—');
+  setf('s5f', (vApto && aptos) ? `R$ ${vApto.toLocaleString('pt-BR',{minimumFractionDigits:2})} × ${aptos} unidades = ${fmt(mensNeg)}/mês` : '');
+
+  set('s6', contNeg ? fmt(contNeg) : '—');
+  setf('s6f', mensNeg ? `${fmt(mensNeg)} × ${prazo} meses = ${fmt(contNeg)}` : '');
+
+  set('s7', fmt(contMin));
+  setf('s7f', `${fmt(recLiq)} × ${prazo} meses = ${fmt(contMin)}`);
+
+  set('s8', extra > 0 ? fmt(extra) : 'R$ 0,00 (abaixo ou no mínimo)', extra > 0 ? 'verde' : '');
+  setf('s8f', contNeg ? `${fmt(contNeg)} − ${fmt(contMin)} = ${fmt(extra)}` : '');
+
+  set('s9', fmt(comBase));
+  setf('s9f', contNeg ? `${fmt(contNeg)} × 0,5% = ${fmt(comBase)}` : '');
+
+  set('s10', fmt(comBonus));
+  setf('s10f', `${fmt(extra)} × 1,5% = ${fmt(comBonus)}`);
+
+  set('s11', fmt(comTotal));
+  setf('s11f', `${fmt(comBase)} + ${fmt(comBonus)} = ${fmt(comTotal)}`);
+
+  set('s12', bloqueado ? 'R$ 0,00 (proposta bloqueada)' : fmt(comCSS), bloqueado ? 'vermelho' : 'destaque');
+  setf('s12f', !bloqueado ? `${fmt(comTotal)} × 25% = ${fmt(comCSS)}` : 'Valor abaixo do mínimo — sem premiação');
+}
+
+['combo','container','prazo','aptos','vapo'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcular);
+});
+calcular();
+</script>
+</body>
+</html>

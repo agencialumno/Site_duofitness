@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Admin — Duo Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="login-admin.css">
+</head>
+<body>
+
+  <div id="loadingOverlay">
+    <div class="loading-spinner-admin"></div>
+  </div>
+
+  <div class="login-wrap">
+    <div class="login-box">
+      <img class="login-logo" src="assets/Logo sem fundo.png" alt="Duo Fitness">
+      <div class="login-titulo">Painel Administrativo</div>
+      <div class="login-sub">Acesso restrito a administradores</div>
+
+      <button class="btn-google" onclick="loginGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Entrar com Google
+      </button>
+
+      <div class="login-divider">ou</div>
+
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="text" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="••••••••">
+      </div>
+
+      <div class="auth-erro" id="authErro"></div>
+
+      <button class="btn-auth" onclick="submitAuth()">Entrar</button>
+
+      <div class="login-suporte">
+        <span>Precisa de ajuda?</span>
+        <a href="mailto:atendimento@agencialumno.com.br">atendimento@agencialumno.com.br</a>
+        <a href="https://wa.me/5521975996032?text=Estou%20precisando%20de%20suporte%20sobre%20o%20simulador%20de%20propostas%20Duo%20Fitness" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="login-admin.js"></script>
+</body>
+</html>

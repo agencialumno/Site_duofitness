@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<script>
+  if (localStorage.getItem('duofitness_tema') === 'claro')
+    document.documentElement.classList.add('tema-claro');
+</script>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin — Duo Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="admin.css">
+
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-txt">Verificando acesso...</div>
+</div>
+
+<!-- ACESSO NEGADO -->
+<div id="acessoNegado">
+  <div class="acesso-negado-titulo">⛔ Acesso Negado</div>
+  <div class="acesso-negado-sub">Você não tem permissão para acessar o painel administrativo.</div>
+  <button class="btn-primario" onclick="window.location.href='login.html'">Voltar ao Login</button>
+</div>
+
+<button class="hamburger" id="hamburger">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/Logo sem fundo.png" alt="Duo Fitness">
+    <div class="sidebar-label">Painel Administrativo</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Visão Geral</div>
+    <button class="nav-item ativo" onclick="irPara('propostas', this)">
+      <span class="nav-icon">📄</span> Propostas
+    </button>
+    <button class="nav-item" onclick="irPara('online', this)">
+      <span class="nav-icon">🟢</span> Usuários Online
+      <span class="nav-badge" id="badgeOnline">0</span>
+    </button>
+
+    <div class="nav-section">Administração</div>
+    <button class="nav-item" onclick="irPara('usuarios', this)">
+      <span class="nav-icon">👥</span> Usuários
+    </button>
+    <button class="nav-item" onclick="irPara('logs', this)">
+      <span class="nav-icon">📋</span> Logs
+    </button>
+
+    <div class="nav-section">Ajuda</div>
+    <button class="nav-item" onclick="irPara('suporte', this)">
+      <span class="nav-icon">💬</span> Suporte
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer">
+    <button class="btn-tema" id="btnTemaAdmin" title="Mudar tema">🌙</button>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-nome" id="sidebarNome">—</div>
+        <div class="sidebar-user-email" id="sidebarEmail">—</div>
+      </div>
+    </div>
+    <button class="btn-sair" onclick="fazerLogout()">Sair</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-info">
+      <div class="topbar-titulo" id="topbarTitulo">Propostas Geradas</div>
+      <div class="topbar-sub" id="topbarSub">Todas as propostas geradas pelos usuários</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="online-badge">
+        <div class="online-dot"></div>
+        <span id="onlineCount">0</span> online agora
+      </div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ── SEÇÃO: PROPOSTAS ── -->
+    <div class="secao ativa" id="secao-propostas">
+      <div class="metricas-grid">
+        <div class="metrica-card">
+          <div class="metrica-label">Total de Propostas</div>
+          <div class="metrica-valor amarelo" id="metricaTotal">—</div>
+        </div>
+        <div class="metrica-card">
+          <div class="metrica-label">PowerPoint</div>
+          <div class="metrica-valor" id="metricaPptx">—</div>
+        </div>
+        <div class="metrica-card">
+          <div class="metrica-label">PDF</div>
+          <div class="metrica-valor" id="metricaPdf">—</div>
+        </div>
+        <div class="metrica-card">
+          <div class="metrica-label">Este mês</div>
+          <div class="metrica-valor verde" id="metricaMes">—</div>
+        </div>
+      </div>
+
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <div class="card-tabela-titulo">Propostas</div>
+          <div class="filtros">
+            <input class="filtro-input" type="text" id="filtroCondominio" placeholder="Buscar condomínio..." oninput="filtrarPropostas()">
+            <select class="filtro-input" id="filtroCombo" onchange="filtrarPropostas()">
+              <option value="">Todos os combos</option>
+              <option>UNO</option><option>DUO</option><option>TRIPLE</option><option>PRIME</option><option>ELITE</option>
+            </select>
+            <select class="filtro-input" id="filtroTipo" onchange="filtrarPropostas()">
+              <option value="">PPTX e PDF</option>
+              <option value="PPTX">PPTX</option>
+              <option value="PDF">PDF</option>
+            </select>
+            <select class="filtro-input" id="filtroUsuario" onchange="filtrarPropostas()">
+              <option value="">Todos os usuários</option>
+            </select>
+          </div>
+        </div>
+        <div id="tabelaWrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Condomínio</th>
+                <th>Combo</th>
+                <th>Usuário</th>
+                <th>Tipo</th>
+                <th>Data</th>
+                <th>Arquivo</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaPropostas">
+              <tr><td colspan="6" class="vazio">Carregando...</td></tr>
+            </tbody>
+          </table>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:14px 20px;border-top:1px solid var(--borda);">
+            <span id="paginacaoInfo" style="font-size:12px;color:var(--muted)"></span>
+            <button class="btn-secundario" id="btnAnterior" onclick="paginaAnterior()" style="padding:6px 14px;font-size:12px;">← Anterior</button>
+            <button class="btn-secundario" id="btnProximo" onclick="proximaPagina()" style="padding:6px 14px;font-size:12px;">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEÇÃO: USUÁRIOS ONLINE ── -->
+    <div class="secao" id="secao-online">
+      <div class="metricas-grid" style="grid-template-columns: repeat(2,1fr);">
+        <div class="metrica-card">
+          <div class="metrica-label">Online agora</div>
+          <div class="metrica-valor verde" id="metricaOnline">0</div>
+        </div>
+        <div class="metrica-card">
+          <div class="metrica-label">Total de usuários</div>
+          <div class="metrica-valor" id="metricaTotalUsuarios">—</div>
+        </div>
+      </div>
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <div class="card-tabela-titulo">Quem está online agora</div>
+        </div>
+        <div class="online-grid" id="onlineGrid" style="padding:16px;">
+          <div class="vazio">Ninguém online no momento.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEÇÃO: USUÁRIOS ── -->
+    <div class="secao" id="secao-usuarios">
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <div class="card-tabela-titulo">Usuários Autorizados</div>
+        </div>
+        <div id="listaUsuarios">
+          <div class="vazio">Carregando...</div>
+        </div>
+        <div class="add-usuario-form">
+          <input type="email" id="novoEmail" placeholder="novo@email.com">
+          <button class="btn-primario" onclick="adicionarUsuario()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- ── SEÇÃO: LOGS ── -->
+<div class="secao" id="secao-logs">
+
+  <div style="display:flex;gap:10px;margin-bottom:16px;">
+    <button class="btn-primario" id="btnAbaPropostas" onclick="alternarAbaLog('propostas')">Logs de Propostas</button>
+    <button class="btn-secundario" id="btnAbaLogin" onclick="alternarAbaLog('login')">Logs de Acesso</button>
+  </div>
+
+  <div id="abaLogsPropostas">
+    <div class="card-tabela">
+      <div class="card-tabela-header">
+        <div class="card-tabela-titulo">Logs de Propostas</div>
+        <div class="filtros">
+          <input class="filtro-input" type="text" id="filtroLog" placeholder="Buscar..." oninput="filtrarLogs()">
+          <button class="btn-secundario" onclick="exportarCSV()">⬇ Exportar CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuário</th><th>Condomínio</th><th>Combo</th><th>Tipo</th><th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaLogs">
+            <tr><td colspan="5" class="vazio">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="abaLogsLogin" style="display:none;">
+    <div class="card-tabela">
+      <div class="card-tabela-header">
+        <div class="card-tabela-titulo">Logs de Acesso</div>
+        <div class="filtros">
+  <input class="filtro-input" type="text" id="filtroLogLogin" placeholder="Buscar..." oninput="filtrarLogsLogin()">
+  <button class="btn-secundario" onclick="exportarCSVLogin()">⬇ Exportar CSV</button>
+</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>E-mail</th><th>Nome</th><th>Método</th><th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaLogsLogin">
+            <tr><td colspan="4" class="vazio">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+    <!-- ── SEÇÃO: SUPORTE ── -->
+    <div class="secao" id="secao-suporte">
+      <div class="suporte-card">
+        <div class="suporte-titulo">Contato de Suporte</div>
+        <a class="suporte-item" href="mailto:atendimento@agencialumno.com.br">
+          <span class="suporte-item-icon">✉️</span>
+          <div>
+            <div class="suporte-item-label">E-mail</div>
+            <div class="suporte-item-valor">atendimento@agencialumno.com.br</div>
+          </div>
+        </a>
+        <a class="suporte-item" href="https://wa.me/5521975996032?text=Estou%20precisando%20de%20suporte%20sobre%20o%20simulador%20de%20propostas%20Duo%20Fitness" target="_blank">
+          <span class="suporte-item-icon">💬</span>
+          <div>
+            <div class="suporte-item-label">WhatsApp</div>
+            <div class="suporte-item-valor">+55 21 97599-6032</div>
+          </div>
+        </a>
+        <a class="suporte-item" href="index.html">
+          <span class="suporte-item-icon">🖥️</span>
+          <div>
+            <div class="suporte-item-label">Simulador</div>
+            <div class="suporte-item-valor">Abrir o simulador de propostas</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { iniciarTema, alternarTema } from './tema.js';
+  iniciarTema();
+  document.getElementById('btnTemaAdmin').addEventListener('click', alternarTema);
+</script>
+
+<script type="module" src="admin.js"></script>
+
+
+</body>
+</html>
