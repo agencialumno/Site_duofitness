@@ -825,6 +825,20 @@ function fecharHistoricoFora(e) {
   if (e.target === document.getElementById('modalHistorico')) fecharHistorico();
 }
 
+async function irParaAdmin() {
+  const { getFirestore, collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const user = auth.currentUser;
+  if (!user) return;
+  const db2 = getFirestore(fbApp);
+  const q = query(collection(db2, 'admins'), where('email', '==', user.email.toLowerCase()));
+  const snap = await getDocs(q);
+  if (!snap.empty) {
+    window.open('admin.html', '_blank');
+  } else {
+    alert('Você não tem acesso ao painel administrativo.');
+  }
+}
+
 // ── EXPOR FUNÇÕES GLOBAIS (necessário para type="module") ──
 window.togglePromo      = togglePromo;
 window.atualizar        = atualizar;
@@ -839,6 +853,7 @@ window.reabrirProposta  = reabrirProposta;
 window.abrirHistorico   = abrirHistorico;
 window.fecharHistorico  = fecharHistorico;
 window.fecharHistoricoFora = fecharHistoricoFora;
+window.irParaAdmin = irParaAdmin;
 
 // ── HEARTBEAT ONLINE ──
 async function iniciarHeartbeat(user) {

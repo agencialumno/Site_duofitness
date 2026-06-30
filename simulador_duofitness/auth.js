@@ -138,6 +138,11 @@ function verificarAuth() {
         : user.email.split('@')[0];
       nomeEl.textContent = `Olá, ${nome}!`;
     }
+    // Mostrar botão admin se for admin
+    const qAdmin = query(collection(db, 'admins'), where('email', '==', user.email.toLowerCase()));
+    const snapAdmin = await getDocs(qAdmin);
+    const btnAdmin = document.getElementById('btnAdmin');
+    if (btnAdmin && !snapAdmin.empty) btnAdmin.style.display = 'block';
   });
 }
 async function logout() {
