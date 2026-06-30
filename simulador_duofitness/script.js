@@ -99,11 +99,11 @@ async function salvarNoStorage(blob, nomeArquivo, tipo = 'PPTX') {
 // ── DADOS DOS COMBOS ──
 // ── DADOS DOS COMBOS ──
 const COMBOS = {
-  UNO:    { parcela: 1832.22, manutencao: 300.00,  container: 2500.00 },
-  DUO:    { parcela: 3020.45, manutencao: 600.00,  container: 5000.00 },
-  TRIPLE: { parcela: 4533.37, manutencao: 900.00,  container: 7500.00 },
-  PRIME:  { parcela: 5574.78, manutencao: 1200.00, container: 10000.00 },
-  ELITE:  { parcela: 7862.54, manutencao: 1300.00, container: 11000.00 },
+  UNO:    { parcela: 1832.22, manutencao: 300.00,  container: 2500.00,  totalEquip: 77146.19,  entrada: 3857.30,  numParcelas: 40 },
+  DUO:    { parcela: 3020.45, manutencao: 600.00,  container: 5000.00,  totalEquip: 149432.99, entrada: 7471.64,  numParcelas: 47 },
+  TRIPLE: { parcela: 4533.37, manutencao: 900.00,  container: 7500.00,  totalEquip: 224282.99, entrada: 11214.14, numParcelas: 47 },
+  PRIME:  { parcela: 5574.78, manutencao: 1200.00, container: 10000.00, totalEquip: 275804.99, entrada: 13790.24, numParcelas: 47 },
+  ELITE:  { parcela: 7862.54, manutencao: 1300.00, container: 11000.00, totalEquip: 389216.99, entrada: 19449.44, numParcelas: 47 },
 };
 
 const MARGEM_FRANQUEADO = 0.30;
@@ -136,6 +136,22 @@ function calcularCascata(combo, temContainer) {
     imposto: apoImposto,
     mensalidadeMinima,
   };
+}
+
+function recalcularParcela(combo) {
+  const d = COMBOS[combo];
+
+  // Soma o total atual dos equipamentos com as quantidades editadas
+  let novoTotal = 0;
+  CATALOGO[combo].categorias.forEach(cat => {
+    cat.itens.forEach(item => {
+      novoTotal += item.valorUnit * item.qtd;
+    });
+  });
+
+  // (novoTotal - entrada) ÷ parcelas = nova parcela
+  const novaParcela = (novoTotal - d.entrada) / d.numParcelas;
+  COMBOS[combo].parcela = Math.max(0, novaParcela);
 }
 
 function renderizarDRE(combo, cont, aptos) {
@@ -173,34 +189,34 @@ const CATALOGO = {
     tag: "Combo Entrada", nome: "UNO",
     categorias: [
       { nome: "Cardio", itens: [
-        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 1, valorUnit: 17034.00 },
-        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 1, valorUnit: 17034.00, ph: 'ESTEIRA' },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40, ph: 'BIKE_KIKOS' },
       ] },
       { nome: "Força", itens: [
-        { curto: "Estação Multifuncional", completo: "Estação Multifuncional Kikos 519BF", qtd: 1, valorUnit: 33594.00 },
+        { curto: "Estação Multifuncional", completo: "Estação Multifuncional Kikos 519BF", qtd: 1, valorUnit: 33594.00, ph: 'ESTACAO_MULT' },
       ] },
       { nome: "Bancos", itens: [
-        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00, ph: 'BANCO_MULT' },
       ] },
       { nome: "Pesos Livres", itens: [
-        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
-        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
-        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40, ph: 'ANILHA' },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40, ph: 'BARRA_W' },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40, ph: 'HALTER' },
       ] },
       { nome: "Armazenamento", itens: [
-        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
-        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40, ph: 'SUP_BARRA' },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00, ph: 'SUP_HALTER' },
       ] },
       { nome: "Puxadores", itens: [
-        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
-        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
-        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
-        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
-        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99, ph: 'PUX_RETO' },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20, ph: 'CORDA_SERG' },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40, ph: 'PUX_ROMA' },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40, ph: 'PUX_TORNO' },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80, ph: 'TRI_SERG' },
       ] },
       { nome: "Acessórios", itens: [
-        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
-        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40, ph: 'STEP_LIGHT' },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00, ph: 'COLCHONETE' },
       ] },
     ]
   },
@@ -208,38 +224,38 @@ const CATALOGO = {
     tag: "Combo Intermediário", nome: "DUO",
     categorias: [
       { nome: "Cardio", itens: [
-        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 2, valorUnit: 17034.00 },
-        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
-        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 2, valorUnit: 17034.00, ph: 'ESTEIRA' },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40, ph: 'BIKE_KIKOS' },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00, ph: 'BIKE_SPI' },
       ] },
       { nome: "Força", itens: [
-        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
-        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
-        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00, ph: 'CROSS_SMITH' },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00, ph: 'AD_ABD' },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00, ph: 'EX_FLX' },
       ] },
       { nome: "Bancos", itens: [
-        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
-        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00, ph: 'BANCO_MULT' },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80, ph: 'BANCO_SUP' },
       ] },
       { nome: "Pesos Livres", itens: [
-        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
-        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
-        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40, ph: 'ANILHA' },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40, ph: 'BARRA_W' },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40, ph: 'HALTER' },
       ] },
       { nome: "Armazenamento", itens: [
-        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
-        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40, ph: 'SUP_BARRA' },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00, ph: 'SUP_HALTER' },
       ] },
       { nome: "Puxadores", itens: [
-        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
-        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
-        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
-        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
-        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99, ph: 'PUX_RETO' },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20, ph: 'CORDA_SERG' },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40, ph: 'PUX_ROMA' },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40, ph: 'PUX_TORNO' },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80, ph: 'TRI_SERG' },
       ] },
       { nome: "Acessórios", itens: [
-        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
-        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40, ph: 'STEP_LIGHT' },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00, ph: 'COLCHONETE' },
       ] },
     ]
   },
@@ -247,42 +263,42 @@ const CATALOGO = {
     tag: "Combo Avançado", nome: "TRIPLE",
     categorias: [
       { nome: "Cardio", itens: [
-        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 3, valorUnit: 17034.00 },
-        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
-        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
-        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 3, valorUnit: 17034.00, ph: 'ESTEIRA' },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40, ph: 'BIKE_KIKOS' },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00, ph: 'BIKE_SPI' },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00, ph: 'ELIPTICO' },
       ] },
       { nome: "Força", itens: [
-        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
-        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
-        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
-        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
-        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
-        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00, ph: 'CROSS_SMITH' },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00, ph: 'LEG_PRESS' },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00, ph: 'PEIT_DORS' },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00, ph: 'AD_ABD' },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00, ph: 'EX_FLX' },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00, ph: 'PULLEY' },
       ] },
       { nome: "Bancos", itens: [
-        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
-        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00, ph: 'BANCO_MULT' },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80, ph: 'BANCO_SUP' },
       ] },
       { nome: "Pesos Livres", itens: [
-        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
-        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
-        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40, ph: 'ANILHA' },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40, ph: 'BARRA_W' },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40, ph: 'HALTER' },
       ] },
       { nome: "Armazenamento", itens: [
-        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
-        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40, ph: 'SUP_BARRA' },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00, ph: 'SUP_HALTER' },
       ] },
       { nome: "Puxadores", itens: [
-        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
-        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
-        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
-        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
-        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99, ph: 'PUX_RETO' },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20, ph: 'CORDA_SERG' },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40, ph: 'PUX_ROMA' },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40, ph: 'PUX_TORNO' },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80, ph: 'TRI_SERG' },
       ] },
       { nome: "Acessórios", itens: [
-        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
-        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40, ph: 'STEP_LIGHT' },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00, ph: 'COLCHONETE' },
       ] },
     ]
   },
@@ -290,44 +306,44 @@ const CATALOGO = {
     tag: "Combo Premium", nome: "PRIME",
     categorias: [
       { nome: "Cardio", itens: [
-        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00 },
-        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
-        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
-        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00, ph: 'ESTEIRA' },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40, ph: 'BIKE_KIKOS' },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00, ph: 'BIKE_SPI' },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00, ph: 'ELIPTICO' },
       ] },
       { nome: "Força", itens: [
-        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00 },
-        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
-        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00 },
-        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
-        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
-        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
-        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
-        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00, ph: 'CROSS_ANG' },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00, ph: 'CROSS_SMITH' },
+        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00, ph: 'G_MAX' },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00, ph: 'LEG_PRESS' },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00, ph: 'PEIT_DORS' },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00, ph: 'AD_ABD' },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00, ph: 'EX_FLX' },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00, ph: 'PULLEY' },
       ] },
       { nome: "Bancos", itens: [
-        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
-        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00, ph: 'BANCO_MULT' },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80, ph: 'BANCO_SUP' },
       ] },
       { nome: "Pesos Livres", itens: [
-        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
-        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
-        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40, ph: 'ANILHA' },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40, ph: 'BARRA_W' },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40, ph: 'HALTER' },
       ] },
       { nome: "Armazenamento", itens: [
-        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
-        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40, ph: 'SUP_BARRA' },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00, ph: 'SUP_HALTER' },
       ] },
       { nome: "Puxadores", itens: [
-        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
-        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
-        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
-        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
-        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99, ph: 'PUX_RETO' },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20, ph: 'CORDA_SERG' },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40, ph: 'PUX_ROMA' },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40, ph: 'PUX_TORNO' },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80, ph: 'TRI_SERG' },
       ] },
       { nome: "Acessórios", itens: [
-        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
-        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40, ph: 'STEP_LIGHT' },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00, ph: 'COLCHONETE' },
       ] },
     ]
   },
@@ -335,55 +351,55 @@ const CATALOGO = {
     tag: "Combo Elite", nome: "ELITE",
     categorias: [
       { nome: "Cardio", itens: [
-        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00 },
-        { curto: "Bike KR9.6", completo: "Bike Kikos KR9.6iX", qtd: 1, valorUnit: 11394.00 },
-        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
-        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
-        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
-        { curto: "Escada Profissional", completo: "Escada Profissional com Display LED KE17.0i", qtd: 1, valorUnit: 29940.00 },
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00, ph: 'ESTEIRA' },
+        { curto: "Bike KR9.6", completo: "Bike Kikos KR9.6iX", qtd: 1, valorUnit: 11394.00, ph: 'BIKE_ERGO' },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40, ph: 'BIKE_KIKOS' },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00, ph: 'BIKE_SPI' },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00, ph: 'ELIPTICO' },
+        { curto: "Escada Profissional", completo: "Escada Profissional com Display LED KE17.0i", qtd: 1, valorUnit: 29940.00, ph: 'ESCADA' },
       ] },
       { nome: "Força", itens: [
-        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00 },
-        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
-        { curto: "Elevação Pélvica", completo: "Elevação Pélvica TTPL92i", qtd: 1, valorUnit: 15174.00 },
-        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00 },
-        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
-        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
-        { curto: "Desenvolvimento", completo: "Desenvolvimento PR23 Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 13854.00 },
-        { curto: "Puxada Alta/Supino", completo: "Puxada Alta com Supino PR35 Dual Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 17034.00 },
-        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
-        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
-        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00, ph: 'CROSS_ANG' },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00, ph: 'CROSS_SMITH' },
+        { curto: "Elevação Pélvica", completo: "Elevação Pélvica TTPL92i", qtd: 1, valorUnit: 15174.00, ph: 'ELEVACAO' },
+        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00, ph: 'G_MAX' },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00, ph: 'LEG_PRESS' },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00, ph: 'PEIT_DORS' },
+        { curto: "Desenvolvimento", completo: "Desenvolvimento PR23 Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 13854.00, ph: 'DESENV' },
+        { curto: "Puxada Alta/Supino", completo: "Puxada Alta com Supino PR35 Dual Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 17034.00, ph: 'PUXADA_ALTA' },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00, ph: 'AD_ABD' },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00, ph: 'EX_FLX' },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00, ph: 'PULLEY' },
       ] },
       { nome: "Bancos", itens: [
-        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
-        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00, ph: 'BANCO_MULT' },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80, ph: 'BANCO_SUP' },
       ] },
       { nome: "Pesos Livres", itens: [
-        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 30, valorUnit: 509.40 },
-        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
-        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
-        { curto: "Dumbell 14kg", completo: "Dumbell Rubber Vermelho Kikos 14kg", qtd: 2, valorUnit: 791.40 },
-        { curto: "Dumbell 18kg", completo: "Dumbell Rubber Vermelho Kikos 18kg", qtd: 2, valorUnit: 1019.40 },
-        { curto: "Dumbell 22kg", completo: "Dumbell Rubber Vermelho Kikos 22kg", qtd: 2, valorUnit: 1241.40 },
-        { curto: "Dumbell 26kg", completo: "Dumbell Rubber Vermelho Kikos 26kg", qtd: 2, valorUnit: 1463.40 },
-        { curto: "Dumbell 30kg", completo: "Dumbell Rubber Vermelho Kikos 30kg", qtd: 2, valorUnit: 1691.40 },
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 30, valorUnit: 509.40, ph: 'ANILHA' },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40, ph: 'BARRA_W' },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40, ph: 'HALTER' },
+        { curto: "Dumbell 14kg", completo: "Dumbell Rubber Vermelho Kikos 14kg", qtd: 2, valorUnit: 791.40, ph: 'D_14' },
+        { curto: "Dumbell 18kg", completo: "Dumbell Rubber Vermelho Kikos 18kg", qtd: 2, valorUnit: 1019.40, ph: 'D_18' },
+        { curto: "Dumbell 22kg", completo: "Dumbell Rubber Vermelho Kikos 22kg", qtd: 2, valorUnit: 1241.40, ph: 'D_22' },
+        { curto: "Dumbell 26kg", completo: "Dumbell Rubber Vermelho Kikos 26kg", qtd: 2, valorUnit: 1463.40, ph: 'D_26' },
+        { curto: "Dumbell 30kg", completo: "Dumbell Rubber Vermelho Kikos 30kg", qtd: 2, valorUnit: 1691.40, ph: 'D_30' },
       ] },
       { nome: "Armazenamento", itens: [
-        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
-        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
-        { curto: "Rack de Dumbell", completo: "Rack de Dumbell 5 Pares MD6208 Kikos", qtd: 1, valorUnit: 3414.00 },
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40, ph: 'SUP_BARRA' },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00, ph: 'SUP_HALTER' },
+        { curto: "Rack de Dumbell", completo: "Rack de Dumbell 5 Pares MD6208 Kikos", qtd: 1, valorUnit: 3414.00, ph: 'RACK_DUMBELL' },
       ] },
       { nome: "Puxadores", itens: [
-        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
-        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
-        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
-        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
-        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99, ph: 'PUX_RETO' },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20, ph: 'CORDA_SERG' },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40, ph: 'PUX_ROMA' },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40, ph: 'PUX_TORNO' },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80, ph: 'TRI_SERG' },
       ] },
       { nome: "Acessórios", itens: [
-        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
-        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40, ph: 'STEP_LIGHT' },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00, ph: 'COLCHONETE' },
       ] },
     ]
   },
@@ -615,7 +631,9 @@ function confirmarEdicaoItem() {
   }
 
   CATALOGO[combo].categorias[catIdx].itens[itemIdx].qtd = novaQtd;
+  recalcularParcela(combo);
   verificarItensEditados(combo);
+  atualizar();
   fecharEdicaoItem();
   abrirModal();
 }
@@ -672,6 +690,16 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     PROMO_MES:   promoMesTxt,
     PROMO_VALOR: promoValorTxt,
   };
+
+  // Adiciona quantidades dos equipamentos do combo selecionado
+  const catCombo = CATALOGO[combo];
+  if (catCombo) {
+    catCombo.categorias.forEach(cat => {
+      cat.itens.forEach(item => {
+        if (item.ph) valores[item.ph] = String(item.qtd);
+      });
+    });
+  }
 
   const slides = Object.keys(zip.files).filter(
     f => f.startsWith('ppt/slides/slide') && f.endsWith('.xml')
