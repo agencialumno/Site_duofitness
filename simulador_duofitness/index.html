@@ -107,13 +107,13 @@
             <div class="tooltip-box">Escolha o pacote de equipamentos que será instalado no condomínio.</div>
           </div>
         </div>
-        <select id="combo" onchange="atualizar()">
-          <option value="UNO">UNO</option>
-          <option value="DUO" selected>DUO</option>
-          <option value="TRIPLE">TRIPLE</option>
-          <option value="PRIME">PRIME</option>
-          <option value="ELITE">ELITE</option>
-        </select>
+        <select id="combo" onchange="resetarCatalogo(this.value); atualizar()">
+  <option value="UNO">UNO</option>
+  <option value="DUO" selected>DUO</option>
+  <option value="TRIPLE">TRIPLE</option>
+  <option value="PRIME">PRIME</option>
+  <option value="ELITE">ELITE</option>
+</select>
       </div>
       <div class="campo">
         <div class="label-row">
@@ -226,7 +226,7 @@
   </div>
 </div>
 
-<div class="aviso-combo" id="avisoCombo">⚠ Combo ainda não disponível — aguardando arquivo PPT</div>
+<div class="aviso-combo" id="avisoCombo" style="display:none;">⚠ Combo ainda não disponível — aguardando arquivo PPT</div>
 
 <!-- MODAL EQUIPAMENTOS -->
 <div class="modal-overlay" id="modalOverlay" onclick="fecharModalFora(event)">

@@ -407,6 +407,15 @@ const CATALOGO = {
 
 const CATALOGO_ORIGINAL = JSON.parse(JSON.stringify(CATALOGO));
 
+function resetarCatalogo(combo) {
+  CATALOGO[combo].categorias.forEach((cat, catIdx) => {
+    cat.itens.forEach((item, itemIdx) => {
+      item.qtd = CATALOGO_ORIGINAL[combo].categorias[catIdx].itens[itemIdx].qtd;
+    });
+  });
+  COMBOS[combo].parcela = (COMBOS[combo].totalEquip - COMBOS[combo].entrada) / COMBOS[combo].numParcelas;
+}
+
 function verificarItensEditados(combo) {
   const atual = CATALOGO[combo];
   const original = CATALOGO_ORIGINAL[combo];
@@ -1096,6 +1105,7 @@ function limparFormulario() {
 
   if (promoOn) togglePromo();
 
+  Object.keys(COMBOS).forEach(combo => resetarCatalogo(combo));
   itensEditados = false;
   document.getElementById('avisoEdicaoSimulador').style.display = 'none';
 
@@ -1215,6 +1225,7 @@ async function irParaAdmin() {
 // ── EXPOR FUNÇÕES GLOBAIS (necessário para type="module") ──
 window.togglePromo      = togglePromo;
 window.atualizar        = atualizar;
+window.resetarCatalogo  = resetarCatalogo;
 window.abrirModal       = abrirModal;
 window.fecharModal      = fecharModal;
 window.fecharModalFora  = fecharModalFora;
