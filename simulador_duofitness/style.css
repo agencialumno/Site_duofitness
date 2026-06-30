@@ -500,8 +500,7 @@ select option { background: #1a1a1a; }
   border: 1px solid var(--borda);
   border-radius: 20px;
   padding: 32px;
-  max-width: 640px;
-  width: 100%;
+  width: min(95vw, 1200px);
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
@@ -545,31 +544,32 @@ select option { background: #1a1a1a; }
   padding: 14px;
 }
 .modal-equip-titulo {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--amarelo);
   text-transform: uppercase;
   letter-spacing: .08em;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .modal-equip-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--texto);
-  padding: 4px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255,255,255,.04);
+  gap: 10px;
 }
 .modal-equip-item:last-child { border-bottom: none; }
 .modal-equip-qty {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--amarelo);
   background: var(--amarelo-dim);
   border: 1px solid var(--amarelo-border);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 8px;
   flex-shrink: 0;
 }
 
@@ -739,10 +739,6 @@ select option { background: #1a1a1a; }
   }
 
   /* Modal */
-  .modal-box {
-    padding: 20px;
-    max-height: 90vh;
-  }
 
   .modal-titulo-combo {
     font-size: 22px;
@@ -1460,4 +1456,99 @@ html.tema-claro .btn-calculadora {
 html.tema-claro .btn-calculadora:hover {
   border-color: #8a6800;
   box-shadow: 0 0 0 3px rgba(180,130,0,0.10);
+}
+
+.modal-equip-direita {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.modal-equip-editar {
+  background: transparent;
+  border: 1px solid var(--amarelo-border);
+  border-radius: 6px;
+  color: var(--amarelo);
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.modal-equip-editar:hover { background: var(--amarelo-dim); }
+
+html.tema-claro .modal-equip-editar {
+  border-color: #8a6800;
+  color: #8a6800;
+}
+html.tema-claro .modal-equip-editar:hover { background: rgba(180,130,0,0.10); }
+
+html.tema-claro .modal-equip-titulo {
+  color: #8a6800;
+}
+
+html.tema-claro .modal-equip-item {
+  color: #111111;
+  border-color: rgba(0,0,0,0.06);
+}
+
+html.tema-claro .modal-equip-qty {
+  background: rgba(180,130,0,0.15);
+  color: #7a5e00;
+  border-color: rgba(180,130,0,0.35);
+}
+
+html.tema-claro .modal-equip-editar {
+  border-color: #8a6800;
+  color: #8a6800;
+  background: #ffffff;
+}
+html.tema-claro .modal-equip-editar:hover {
+  background: rgba(180,130,0,0.10);
+}
+
+html.tema-claro .modal-titulo-combo {
+  color: #8a6800;
+}
+
+/* ── TABELA DRE (memória de cálculo) ── */
+.dre-table td {
+  font-size: 12px;
+  padding: 7px 10px;
+}
+.dre-table td:first-child {
+  font-weight: 400;
+  color: var(--muted);
+}
+.dre-table td:last-child {
+  text-align: right;
+  font-weight: 500;
+}
+.dre-table tr.dre-subtotal td {
+  font-weight: 700;
+  color: var(--texto);
+  border-top: 1px solid var(--borda);
+}
+.dre-table tr.dre-total td {
+  font-weight: 700;
+  color: var(--amarelo);
+  background: var(--amarelo-dim);
+}
+.dre-table tr.dre-total td:first-child {
+  color: var(--amarelo);
+}
+
+html.tema-claro .dre-table tr.dre-total td {
+  background: rgba(180,130,0,0.12);
+  color: #7a5e00;
+}
+html.tema-claro .dre-table tr.dre-total td:first-child {
+  color: #7a5e00;
+}
+html.tema-claro .dre-table tr.dre-subtotal td {
+  color: #111111;
+  border-color: rgba(0,0,0,0.12);
 }

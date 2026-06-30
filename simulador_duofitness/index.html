@@ -64,14 +64,26 @@
         <tbody id="tabelaRefBody"></tbody>
       </table>
     </div>
-    <button class="btn-detalhes" id="btnDetalhes" onclick="abrirModal()">
-      ☰ Ver equipamentos do combo selecionado
-    </button>
 
-    <div class="btn-row-secundario">
-    <button class="btn-admin" id="btnAdmin" onclick="irParaAdmin()">Painel Admin</button>
-    <a class="btn-calculadora" href="calculadora.html" target="_blank">Calculadora</a>
+    <div class="preview-card">
+      <div class="preview-label">Memória de cálculo — combo selecionado</div>
+      <table class="ref-table dre-table" id="tabelaDRE">
+        <tbody id="tabelaDREBody"></tbody>
+      </table>
     </div>
+
+    <button class="btn-detalhes" id="btnDetalhes" onclick="abrirModal()">
+  ☰ Ver equipamentos do combo selecionado
+</button>
+
+<div class="aviso-combo" id="avisoEdicaoSimulador" style="display:none; margin-top: 12px;">
+  ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
+</div>
+
+<div class="btn-row-secundario">
+  <button class="btn-admin" id="btnAdmin" onclick="irParaAdmin()">Painel Admin</button>
+  <a class="btn-calculadora" href="calculadora.html" target="_blank">Calculadora</a>
+</div>
   </div>
 
   <!-- COLUNA DIREITA: FORMULÁRIO -->
@@ -226,6 +238,32 @@
     <div class="modal-titulo-combo" id="modalNomeCombo">—</div>
     <div class="modal-subtitulo" id="modalTagCombo">—</div>
     <div class="modal-equip-grid" id="modalEquipGrid"></div>
+  </div>
+</div>
+
+<!-- MODAL EDIÇÃO DE ITEM -->
+<div class="modal-overlay" id="edicaoOverlay">
+  <div class="modal-box" style="width: min(90vw, 420px);">
+    <button class="modal-fechar" onclick="fecharEdicaoItem()">✕</button>
+    <div class="modal-titulo-combo" style="font-size: 18px;">Editar item</div>
+    <div class="modal-subtitulo" id="edicaoNomeCompleto" style="margin-bottom: 16px;">—</div>
+
+    <div class="campo">
+      <label for="edicaoQtd">Quantidade</label>
+      <input type="number" id="edicaoQtd" min="0" step="1" oninput="atualizarPreviewValorEdicao()">
+    </div>
+    <div class="val-min-ref" style="margin-top: 8px;">
+      Valor unitário: <span id="edicaoValorUnit">—</span><br>
+      Valor total: <span id="edicaoValorTotal">—</span>
+    </div>
+    <div class="aviso-combo" id="avisoEspacoEdicao" style="display:none; margin-top: 12px;">
+      ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
+    </div>
+
+    <div class="btn-row-secundario" style="margin-top: 16px;">
+      <button class="btn-limpar" onclick="fecharEdicaoItem()">Cancelar</button>
+      <button class="btn-detalhes" onclick="confirmarEdicaoItem()">Confirmar</button>
+    </div>
   </div>
 </div>
 

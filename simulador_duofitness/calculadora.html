@@ -291,7 +291,7 @@
       <div class="passo">
         <div class="passo-num">1</div>
         <div class="passo-body">
-          <div class="passo-label">Mensalidade base do combo (preço de tabela)</div>
+          <div class="passo-label">Valor da parcela do equipamento</div>
           <div class="passo-valor" id="s1">—</div>
           <div class="passo-formula" id="s1f"></div>
         </div>
@@ -300,7 +300,7 @@
       <div class="passo">
         <div class="passo-num">2</div>
         <div class="passo-body">
-          <div class="passo-label">Desconto do aluguel do container (se condomínio tem espaço próprio)</div>
+          <div class="passo-label">+ Manutenção preventiva</div>
           <div class="passo-valor" id="s2">—</div>
           <div class="passo-formula" id="s2f"></div>
         </div>
@@ -309,7 +309,7 @@
       <div class="passo">
         <div class="passo-num">3</div>
         <div class="passo-body">
-          <div class="passo-label">Mensalidade mínima para a Duo Fitness não ter prejuízo</div>
+          <div class="passo-label">+ Container (se o condomínio optar pelo nosso)</div>
           <div class="passo-valor" id="s3">—</div>
           <div class="passo-formula" id="s3f"></div>
         </div>
@@ -318,7 +318,7 @@
       <div class="passo">
         <div class="passo-num">4</div>
         <div class="passo-body">
-          <div class="passo-label">Valor mínimo por unidade</div>
+          <div class="passo-label">Subtotal (parcela + manutenção + container)</div>
           <div class="passo-valor" id="s4">—</div>
           <div class="passo-formula" id="s4f"></div>
         </div>
@@ -327,7 +327,7 @@
       <div class="passo">
         <div class="passo-num">5</div>
         <div class="passo-body">
-          <div class="passo-label">Mensalidade total negociada</div>
+          <div class="passo-label">+ Margem do franqueado (30%)</div>
           <div class="passo-valor" id="s5">—</div>
           <div class="passo-formula" id="s5f"></div>
         </div>
@@ -336,7 +336,7 @@
       <div class="passo">
         <div class="passo-num">6</div>
         <div class="passo-body">
-          <div class="passo-label">Valor total do contrato (todos os meses somados)</div>
+          <div class="passo-label">+ Royalties (8%)</div>
           <div class="passo-valor" id="s6">—</div>
           <div class="passo-formula" id="s6f"></div>
         </div>
@@ -345,7 +345,7 @@
       <div class="passo">
         <div class="passo-num">7</div>
         <div class="passo-body">
-          <div class="passo-label">Mínimo que a Duo Fitness precisa receber no contrato todo</div>
+          <div class="passo-label">+ Imposto / Nota Fiscal (6,5%) → Mensalidade mínima do condomínio</div>
           <div class="passo-valor" id="s7">—</div>
           <div class="passo-formula" id="s7f"></div>
         </div>
@@ -354,7 +354,7 @@
       <div class="passo">
         <div class="passo-num">8</div>
         <div class="passo-body">
-          <div class="passo-label">Quanto o contrato supera o mínimo (lucro extra gerado)</div>
+          <div class="passo-label">Mensalidade mínima por unidade</div>
           <div class="passo-valor" id="s8">—</div>
           <div class="passo-formula" id="s8f"></div>
         </div>
@@ -363,7 +363,7 @@
       <div class="passo">
         <div class="passo-num">9</div>
         <div class="passo-body">
-          <div class="passo-label">Comissão base (0,5% do valor total do contrato)</div>
+          <div class="passo-label">Mensalidade negociada do condomínio</div>
           <div class="passo-valor" id="s9">—</div>
           <div class="passo-formula" id="s9f"></div>
         </div>
@@ -372,7 +372,7 @@
       <div class="passo">
         <div class="passo-num">10</div>
         <div class="passo-body">
-          <div class="passo-label">Comissão bônus (1,5% do lucro extra)</div>
+          <div class="passo-label">Lucro extra (mensalidade negociada − mensalidade mínima)</div>
           <div class="passo-valor" id="s10">—</div>
           <div class="passo-formula" id="s10f"></div>
         </div>
@@ -381,7 +381,7 @@
       <div class="passo">
         <div class="passo-num">11</div>
         <div class="passo-body">
-          <div class="passo-label">Comissão total (base + bônus)</div>
+          <div class="passo-label">Comissão total (base 0,5% + bônus 0,5% do lucro extra)</div>
           <div class="passo-valor" id="s11">—</div>
           <div class="passo-formula" id="s11f"></div>
         </div>
@@ -390,14 +390,13 @@
       <div class="passo">
         <div class="passo-num">12</div>
         <div class="passo-body">
-          <div class="passo-label">Sua premiação — 25% da comissão total</div>
+          <div class="passo-label">Sua premiação (comissão total)</div>
           <div class="passo-valor destaque" id="s12">—</div>
           <div class="passo-formula" id="s12f"></div>
         </div>
       </div>
 
     </div>
-  </div>
 
   <div class="rodape">
     Duo Fitness · Suporte: <a href="mailto:atendimento@agencialumno.com.br">atendimento@agencialumno.com.br</a>
@@ -406,13 +405,17 @@
 
 <script>
 const COMBOS = {
-  UNO:    { mens: 4500,  alu: 1200 },
-  DUO:    { mens: 7200,  alu: 1800 },
-  TRIPLE: { mens: 10200, alu: 2400 },
-  PRIME:  { mens: 13500, alu: 3000 },
-  ELITE:  { mens: 17000, alu: 3600 },
+  UNO:    { parcela: 1832.22, manutencao: 300.00,  container: 2500.00 },
+  DUO:    { parcela: 3020.45, manutencao: 600.00,  container: 5000.00 },
+  TRIPLE: { parcela: 4533.37, manutencao: 900.00,  container: 7500.00 },
+  PRIME:  { parcela: 5574.78, manutencao: 1200.00, container: 10000.00 },
+  ELITE:  { parcela: 7862.54, manutencao: 1300.00, container: 11000.00 },
 };
-const BASE = 0.005, BONUS = 0.015, CSS_SPLIT = 0.25;
+
+const MARGEM_FRANQUEADO = 0.30;
+const ROYALTIES         = 0.08;
+const IMPOSTO_NF        = 0.065;
+const BASE = 0.005, BONUS = 0.005;
 
 function fmt(v) {
   return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -428,26 +431,47 @@ function setf(id, txt) {
   document.getElementById(id).textContent = txt;
 }
 
+function calcularCascata(combo, temContainer) {
+  const d = COMBOS[combo];
+  const subtotalBase = d.parcela + d.manutencao + (temContainer ? d.container : 0);
+  const apoMargem = subtotalBase * MARGEM_FRANQUEADO;
+  const subtotalMargem = subtotalBase + apoMargem;
+  const apoRoyalties = subtotalMargem * ROYALTIES;
+  const subtotalRoyalties = subtotalMargem + apoRoyalties;
+  const apoImposto = subtotalRoyalties * IMPOSTO_NF;
+  const mensalidadeMinima = subtotalRoyalties + apoImposto;
+
+  return {
+    parcela: d.parcela,
+    manutencao: d.manutencao,
+    container: temContainer ? d.container : 0,
+    subtotalBase,
+    margem: apoMargem,
+    subtotalMargem,
+    royalties: apoRoyalties,
+    subtotalRoyalties,
+    imposto: apoImposto,
+    mensalidadeMinima,
+  };
+}
+
 function calcular() {
   const combo  = document.getElementById('combo').value;
   const cont   = document.getElementById('container').value;
-  const prazo  = parseInt(document.getElementById('prazo').value);
   const aptos  = parseFloat(document.getElementById('aptos').value) || 0;
   const vApto  = parseFloat(document.getElementById('vapo').value) || 0;
 
-  const d = COMBOS[combo];
-  const temDesconto = cont === 'NAO';
-  const mensCli = d.mens - (temDesconto ? d.alu : 0);
-  const recLiq  = d.mens - d.alu;
+  const calc = calcularCascata(combo, cont === 'SIM');
+  const mensCli = calc.mensalidadeMinima;
   const minApto = aptos > 0 ? mensCli / aptos : 0;
   const mensNeg = vApto * aptos;
-  const contNeg = mensNeg * prazo;
-  const contMin = recLiq * prazo;
+  const contNeg = mensNeg;
+  const contMin = calc.mensalidadeMinima;
   const extra   = Math.max(0, contNeg - contMin);
   const comBase  = contNeg * BASE;
   const comBonus = extra * BONUS;
   const comTotal = comBase + comBonus;
-  const comCSS   = comTotal * CSS_SPLIT;
+  const comCSS   = comTotal;
   const pct = minApto > 0 ? vApto / minApto - 1 : 0;
   const bloqueado = vApto > 0 && minApto > 0 && vApto < minApto;
 
@@ -479,46 +503,44 @@ function calcular() {
   document.getElementById('pctAcima').className = 'metrica-valor ' + (bloqueado ? 'vermelho' : pct >= 0.25 ? 'amarelo' : 'verde');
 
   // Passos
-  set('s1', fmt(d.mens));
-  setf('s1f', `Combo ${combo}: mensalidade cheia de tabela`);
+  set('s1', fmt(calc.parcela));
+  setf('s1f', `Combo ${combo}: valor da parcela do equipamento`);
 
-  set('s2', temDesconto ? `− ${fmt(d.alu)} (desconto aplicado)` : 'Sem desconto — container incluso no contrato');
-  setf('s2f', temDesconto
-    ? `${fmt(d.mens)} − ${fmt(d.alu)} = ${fmt(mensCli)}`
-    : `Condomínio usa o container da Duo Fitness → mensalidade permanece ${fmt(d.mens)}`);
+  set('s2', fmt(calc.manutencao));
+  setf('s2f', `${fmt(calc.parcela)} + ${fmt(calc.manutencao)}`);
 
-  set('s3', fmt(recLiq));
-  setf('s3f', `${fmt(d.mens)} − ${fmt(d.alu)} = ${fmt(recLiq)} (valor fixo por combo, independente do container)`);
+  set('s3', cont === 'SIM' ? fmt(calc.container) : 'R$ 0,00 (condomínio tem espaço próprio)');
+  setf('s3f', cont === 'SIM' ? `Container incluso neste combo` : `Container não contratado — não entra na conta`);
 
-  set('s4', minApto ? fmt(minApto) : '—');
-  setf('s4f', aptos ? `${fmt(mensCli)} ÷ ${aptos} unidades = ${fmt(minApto)}/unidade` : '');
+  set('s4', fmt(calc.subtotalBase));
+  setf('s4f', `${fmt(calc.parcela)} + ${fmt(calc.manutencao)} + ${fmt(calc.container)} = ${fmt(calc.subtotalBase)}`);
 
-  set('s5', mensNeg ? fmt(mensNeg) : '—');
-  setf('s5f', (vApto && aptos) ? `R$ ${vApto.toLocaleString('pt-BR',{minimumFractionDigits:2})} × ${aptos} unidades = ${fmt(mensNeg)}/mês` : '');
+  set('s5', fmt(calc.subtotalMargem));
+  setf('s5f', `${fmt(calc.subtotalBase)} × 1,30 = ${fmt(calc.subtotalMargem)}`);
 
-  set('s6', contNeg ? fmt(contNeg) : '—');
-  setf('s6f', mensNeg ? `${fmt(mensNeg)} × ${prazo} meses = ${fmt(contNeg)}` : '');
+  set('s6', fmt(calc.subtotalRoyalties));
+  setf('s6f', `${fmt(calc.subtotalMargem)} × 1,08 = ${fmt(calc.subtotalRoyalties)}`);
 
-  set('s7', fmt(contMin));
-  setf('s7f', `${fmt(recLiq)} × ${prazo} meses = ${fmt(contMin)}`);
+  set('s7', fmt(calc.mensalidadeMinima));
+  setf('s7f', `${fmt(calc.subtotalRoyalties)} × 1,065 = ${fmt(calc.mensalidadeMinima)}`);
 
-  set('s8', extra > 0 ? fmt(extra) : 'R$ 0,00 (abaixo ou no mínimo)', extra > 0 ? 'verde' : '');
-  setf('s8f', contNeg ? `${fmt(contNeg)} − ${fmt(contMin)} = ${fmt(extra)}` : '');
+  set('s8', minApto ? fmt(minApto) : '—');
+  setf('s8f', aptos ? `${fmt(calc.mensalidadeMinima)} ÷ ${aptos} unidades = ${fmt(minApto)}/unidade` : '');
 
-  set('s9', fmt(comBase));
-  setf('s9f', contNeg ? `${fmt(contNeg)} × 0,5% = ${fmt(comBase)}` : '');
+  set('s9', mensNeg ? fmt(mensNeg) : '—');
+  setf('s9f', (vApto && aptos) ? `R$ ${vApto.toLocaleString('pt-BR',{minimumFractionDigits:2})} × ${aptos} unidades = ${fmt(mensNeg)}/mês` : '');
 
-  set('s10', fmt(comBonus));
-  setf('s10f', `${fmt(extra)} × 1,5% = ${fmt(comBonus)}`);
+  set('s10', extra > 0 ? fmt(extra) : 'R$ 0,00 (abaixo ou no mínimo)', extra > 0 ? 'verde' : '');
+  setf('s10f', contNeg ? `${fmt(contNeg)} − ${fmt(contMin)} = ${fmt(extra)}` : '');
 
   set('s11', fmt(comTotal));
-  setf('s11f', `${fmt(comBase)} + ${fmt(comBonus)} = ${fmt(comTotal)}`);
+  setf('s11f', `Base: ${fmt(contNeg)} × 0,5% = ${fmt(comBase)} · Bônus: ${fmt(extra)} × 0,5% = ${fmt(comBonus)} · Total: ${fmt(comTotal)}`);
 
   set('s12', bloqueado ? 'R$ 0,00 (proposta bloqueada)' : fmt(comCSS), bloqueado ? 'vermelho' : 'destaque');
-  setf('s12f', !bloqueado ? `${fmt(comTotal)} × 25% = ${fmt(comCSS)}` : 'Valor abaixo do mínimo — sem premiação');
+  setf('s12f', !bloqueado ? `${fmt(comTotal)} (sem redução)` : 'Valor abaixo do mínimo — sem premiação');
 }
 
-['combo','container','prazo','aptos','vapo'].forEach(id => {
+['combo','container','aptos','vapo'].forEach(id => {
   document.getElementById(id).addEventListener('input', calcular);
 });
 calcular();

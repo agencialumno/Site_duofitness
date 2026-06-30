@@ -97,71 +97,320 @@ async function salvarNoStorage(blob, nomeArquivo, tipo = 'PPTX') {
 }
 
 // ── DADOS DOS COMBOS ──
+// ── DADOS DOS COMBOS ──
 const COMBOS = {
-  UNO:    { mens: 4500,  alu: 1200 },
-  DUO:    { mens: 7200,  alu: 1800 },
-  TRIPLE: { mens: 10200, alu: 2400 },
-  PRIME:  { mens: 13500, alu: 3000 },
-  ELITE:  { mens: 17000, alu: 3600 },
+  UNO:    { parcela: 1832.22, manutencao: 300.00,  container: 2500.00 },
+  DUO:    { parcela: 3020.45, manutencao: 600.00,  container: 5000.00 },
+  TRIPLE: { parcela: 4533.37, manutencao: 900.00,  container: 7500.00 },
+  PRIME:  { parcela: 5574.78, manutencao: 1200.00, container: 10000.00 },
+  ELITE:  { parcela: 7862.54, manutencao: 1300.00, container: 11000.00 },
 };
 
+const MARGEM_FRANQUEADO = 0.30;
+const ROYALTIES         = 0.08;
+const IMPOSTO_NF         = 0.065;
+
 const BASE       = 0.005;
-const BONUS      = 0.015;
-const CSS_SPLIT  = 0.25;
+const BONUS      = 0.005;
+
+// Calcula a cascata completa de um combo e retorna cada etapa para uso na tabela e na DRE.
+function calcularCascata(combo, temContainer) {
+  const d = COMBOS[combo];
+  const subtotalBase = d.parcela + d.manutencao + (temContainer ? d.container : 0);
+  const apoMargem    = subtotalBase * MARGEM_FRANQUEADO;
+  const subtotalMargem = subtotalBase + apoMargem;
+  const apoRoyalties = subtotalMargem * ROYALTIES;
+  const subtotalRoyalties = subtotalMargem + apoRoyalties;
+  const apoImposto   = subtotalRoyalties * IMPOSTO_NF;
+  const mensalidadeMinima = subtotalRoyalties + apoImposto;
+
+  return {
+    parcela: d.parcela,
+    manutencao: d.manutencao,
+    container: temContainer ? d.container : 0,
+    subtotalBase,
+    margem: apoMargem,
+    subtotalMargem,
+    royalties: apoRoyalties,
+    subtotalRoyalties,
+    imposto: apoImposto,
+    mensalidadeMinima,
+  };
+}
+
+function renderizarDRE(combo, cont, aptos) {
+  const corpo = document.getElementById('tabelaDREBody');
+  if (!corpo) return;
+  const calc = calcularCascata(combo, cont === 'SIM');
+  const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
+
+  const linhas = [
+    { label: 'Valor da parcela do equipamento', valor: calc.parcela },
+    { label: '(+) Manutenção preventiva', valor: calc.manutencao },
+    { label: '(+) Container' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
+    { label: 'Subtotal', valor: calc.subtotalBase, destaque: true },
+    { label: '(+) Margem do franqueado (30%)', valor: calc.margem },
+    { label: 'Subtotal', valor: calc.subtotalMargem, destaque: true },
+    { label: '(+) Royalties (8%)', valor: calc.royalties },
+    { label: 'Subtotal', valor: calc.subtotalRoyalties, destaque: true },
+    { label: '(+) Imposto / NF (6,5%)', valor: calc.imposto },
+    { label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true },
+    { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
+  ];
+
+  corpo.innerHTML = linhas.map(l => `
+    <tr class="${l.total ? 'dre-total' : ''} ${l.destaque ? 'dre-subtotal' : ''}">
+      <td>${l.label}</td>
+      <td>${fmt(l.valor)}</td>
+    </tr>
+  `).join('');
+}
+
 const COMBOS_PENDENTES = [];
 
 const CATALOGO = {
   UNO: {
     tag: "Combo Entrada", nome: "UNO",
     categorias: [
-      { nome: "Cardio", itens: [["Esteira Olímpica Professional","×1"],["Bicicleta Spinning Magnética","×1"]] },
-      { nome: "Máquinas de Força", itens: [["Dual Cable Crossover","×1"]] },
-      { nome: "Pesos Livres", itens: [["Halteres 1–10kg","×1"],["Anilhas variadas","×1"]] },
-      { nome: "Acessórios", itens: [["Step Ajustável","×1"],["Colchonetes","×1"],["Tornozeleira Polia","×1"]] },
+      { nome: "Cardio", itens: [
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 1, valorUnit: 17034.00 },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+      ] },
+      { nome: "Força", itens: [
+        { curto: "Estação Multifuncional", completo: "Estação Multifuncional Kikos 519BF", qtd: 1, valorUnit: 33594.00 },
+      ] },
+      { nome: "Bancos", itens: [
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+      ] },
+      { nome: "Pesos Livres", itens: [
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+      ] },
+      { nome: "Armazenamento", itens: [
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+      ] },
+      { nome: "Puxadores", itens: [
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+      ] },
+      { nome: "Acessórios", itens: [
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+      ] },
     ]
   },
   DUO: {
     tag: "Combo Intermediário", nome: "DUO",
     categorias: [
-      { nome: "Cardio", itens: [["Esteira Olímpica Professional","×2"],["Bicicleta Spinning Magnética","×2"]] },
-      { nome: "Máquinas de Força", itens: [["Dual Cable Crossover","×1"],["Supino Articulado","×1"]] },
-      { nome: "Pesos Livres", itens: [["Halteres 1–15kg","×1"],["Anilhas variadas","×1"],["Barra Olímpica","×1"]] },
-      { nome: "Acessórios", itens: [["Step Ajustável","×2"],["Colchonetes","×2"],["Tornozeleira Polia","×1"]] },
+      { nome: "Cardio", itens: [
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 2, valorUnit: 17034.00 },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
+      ] },
+      { nome: "Força", itens: [
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
+      ] },
+      { nome: "Bancos", itens: [
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+      ] },
+      { nome: "Pesos Livres", itens: [
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+      ] },
+      { nome: "Armazenamento", itens: [
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+      ] },
+      { nome: "Puxadores", itens: [
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+      ] },
+      { nome: "Acessórios", itens: [
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+      ] },
     ]
   },
   TRIPLE: {
     tag: "Combo Avançado", nome: "TRIPLE",
     categorias: [
-      { nome: "Cardio", itens: [["Esteira Olímpica Professional","×3"],["Bicicleta Spinning Magnética","×2"],["Elíptico","×1"]] },
-      { nome: "Máquinas de Força", itens: [["Dual Cable Crossover","×2"],["Supino Articulado","×1"],["Leg Press","×1"]] },
-      { nome: "Pesos Livres", itens: [["Halteres 1–20kg","×1"],["Anilhas variadas","×1"],["Barra Olímpica","×2"]] },
-      { nome: "Acessórios", itens: [["Step Ajustável","×2"],["Colchonetes","×4"],["Tornozeleira Polia","×2"]] },
+      { nome: "Cardio", itens: [
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 3, valorUnit: 17034.00 },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
+      ] },
+      { nome: "Força", itens: [
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+      ] },
+      { nome: "Bancos", itens: [
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+      ] },
+      { nome: "Pesos Livres", itens: [
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+      ] },
+      { nome: "Armazenamento", itens: [
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+      ] },
+      { nome: "Puxadores", itens: [
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+      ] },
+      { nome: "Acessórios", itens: [
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+      ] },
     ]
   },
   PRIME: {
     tag: "Combo Premium", nome: "PRIME",
     categorias: [
-      { nome: "Cardio", itens: [["Esteira Olímpica Professional","×4"],["Bicicleta Spinning Magnética","×3"],["Elíptico","×2"]] },
-      { nome: "Máquinas de Força", itens: [["Dual Cable Crossover","×2"],["Supino Articulado","×2"],["Leg Press","×1"],["Puxador Alto/Remada Baixa","×1"]] },
-      { nome: "Pesos Livres", itens: [["Halteres 1–25kg","×1"],["Anilhas variadas","×2"],["Barra Olímpica","×2"]] },
-      { nome: "Acessórios", itens: [["Step Ajustável","×3"],["Colchonetes","×6"],["Tornozeleira Polia","×2"]] },
+      { nome: "Cardio", itens: [
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00 },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
+      ] },
+      { nome: "Força", itens: [
+        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00 },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
+        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00 },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+      ] },
+      { nome: "Bancos", itens: [
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+      ] },
+      { nome: "Pesos Livres", itens: [
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 10, valorUnit: 509.40 },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+      ] },
+      { nome: "Armazenamento", itens: [
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+      ] },
+      { nome: "Puxadores", itens: [
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+      ] },
+      { nome: "Acessórios", itens: [
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+      ] },
     ]
   },
   ELITE: {
     tag: "Combo Elite", nome: "ELITE",
     categorias: [
-      { nome: "Cardio", itens: [["Esteira Olímpica Professional","×5"],["Bicicleta Spinning Magnética","×4"],["Elíptico","×3"],["Remo Indoor","×1"]] },
-      { nome: "Máquinas de Força", itens: [["Dual Cable Crossover","×3"],["Supino Articulado","×2"],["Leg Press","×2"],["Puxador Alto/Remada Baixa","×2"],["Voador Peitoral","×1"]] },
-      { nome: "Pesos Livres", itens: [["Halteres 1–30kg","×1"],["Anilhas variadas","×2"],["Barra Olímpica","×3"],["Barra W","×1"]] },
-      { nome: "Acessórios", itens: [["Step Ajustável","×4"],["Colchonetes","×8"],["Tornozeleira Polia","×2"],["Corda de Pular","×4"]] },
+      { nome: "Cardio", itens: [
+        { curto: "Esteira", completo: "Esteira Kikos KX8500iC 220V", qtd: 4, valorUnit: 17034.00 },
+        { curto: "Bike KR9.6", completo: "Bike Kikos KR9.6iX", qtd: 1, valorUnit: 11394.00 },
+        { curto: "Bike", completo: "Bike Kikos KV8.7i Bivolt", qtd: 1, valorUnit: 4529.40 },
+        { curto: "Bike Spinning", completo: "Bike Spinning Kikos F9", qtd: 1, valorUnit: 7314.00 },
+        { curto: "Elíptico", completo: "Elíptico Kikos KE4.4", qtd: 1, valorUnit: 8874.00 },
+        { curto: "Escada Profissional", completo: "Escada Profissional com Display LED KE17.0i", qtd: 1, valorUnit: 29940.00 },
+      ] },
+      { nome: "Força", itens: [
+        { curto: "Cross Angular", completo: "Cross Angular TTMS21", qtd: 1, valorUnit: 25794.00 },
+        { curto: "Cross com Smith", completo: "Cross com Smith Linha Kikos Pro TTMS22", qtd: 1, valorUnit: 33774.00 },
+        { curto: "Elevação Pélvica", completo: "Elevação Pélvica TTPL92i", qtd: 1, valorUnit: 15174.00 },
+        { curto: "Glúteo Máximo", completo: "Glúteo Máximo TTPL94 Linha Kikos Pro", qtd: 1, valorUnit: 8694.00 },
+        { curto: "Leg Press", completo: "Leg Press 140kg Linha Classic Kikos Pro CLS70", qtd: 1, valorUnit: 18954.00 },
+        { curto: "Peitoral Dorsal", completo: "Peitoral Dorsal TTS22 80kg Linha Titanium Kikos Pro", qtd: 1, valorUnit: 13314.00 },
+        { curto: "Desenvolvimento", completo: "Desenvolvimento PR23 Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 13854.00 },
+        { curto: "Puxada Alta/Supino", completo: "Puxada Alta com Supino PR35 Dual Linha Plate Load Kikos Pro", qtd: 1, valorUnit: 17034.00 },
+        { curto: "Cadeira Adutora/Abdutora", completo: "Cadeira Adutora e Abdutora Linha Dual Kikos Pro TTDS7475", qtd: 1, valorUnit: 18474.00 },
+        { curto: "Cadeira Flexora/Extensora", completo: "Cadeira Flexora e Extensora Linha Dual Kikos Pro TTDS7172", qtd: 1, valorUnit: 22254.00 },
+        { curto: "Pulley com Remada", completo: "Pulley com Remada Linha Dual Kikos Pro TTDS3031", qtd: 1, valorUnit: 16674.00 },
+      ] },
+      { nome: "Bancos", itens: [
+        { curto: "Banco Multi Posições", completo: "Banco Multi Posições Kikos A84", qtd: 2, valorUnit: 2394.00 },
+        { curto: "Banco Supino", completo: "Banco Supino Regulável Fechado 0 a 45 Smart Repair", qtd: 1, valorUnit: 7030.80 },
+      ] },
+      { nome: "Pesos Livres", itens: [
+        { curto: "Anilha 10kg", completo: "Anilha Rubber Vermelho Kikos 10kg", qtd: 30, valorUnit: 509.40 },
+        { curto: "Barra W", completo: "Barra W 1.20m Cromada com Presilha Olímpica Kikos", qtd: 1, valorUnit: 941.40 },
+        { curto: "Halter 10kg", completo: "Halter Emborrachado 10kg", qtd: 11, valorUnit: 353.40 },
+        { curto: "Dumbell 14kg", completo: "Dumbell Rubber Vermelho Kikos 14kg", qtd: 2, valorUnit: 791.40 },
+        { curto: "Dumbell 18kg", completo: "Dumbell Rubber Vermelho Kikos 18kg", qtd: 2, valorUnit: 1019.40 },
+        { curto: "Dumbell 22kg", completo: "Dumbell Rubber Vermelho Kikos 22kg", qtd: 2, valorUnit: 1241.40 },
+        { curto: "Dumbell 26kg", completo: "Dumbell Rubber Vermelho Kikos 26kg", qtd: 2, valorUnit: 1463.40 },
+        { curto: "Dumbell 30kg", completo: "Dumbell Rubber Vermelho Kikos 30kg", qtd: 2, valorUnit: 1691.40 },
+      ] },
+      { nome: "Armazenamento", itens: [
+        { curto: "Suporte para Barras", completo: "Suporte para Barras Olímpicas Kikos", qtd: 1, valorUnit: 2135.40 },
+        { curto: "Suporte para Halteres", completo: "Suporte para Halteres 10 Pares", qtd: 1, valorUnit: 2616.00 },
+        { curto: "Rack de Dumbell", completo: "Rack de Dumbell 5 Pares MD6208 Kikos", qtd: 1, valorUnit: 3414.00 },
+      ] },
+      { nome: "Puxadores", itens: [
+        { curto: "Puxador Reto", completo: "Puxador Reto 60cm Lightning Bolt", qtd: 1, valorUnit: 197.99 },
+        { curto: "Puxador Corda", completo: "Puxador Corda Serginho", qtd: 1, valorUnit: 229.20 },
+        { curto: "Puxador Romano", completo: "Puxador Romano 64cm Serginho", qtd: 1, valorUnit: 605.40 },
+        { curto: "Puxador Tornozelo", completo: "Puxador Tornozelo Alça Cross Serginho", qtd: 1, valorUnit: 98.40 },
+        { curto: "Puxador Triângulo", completo: "Puxador Triângulo Serginho", qtd: 1, valorUnit: 490.80 },
+      ] },
+      { nome: "Acessórios", itens: [
+        { curto: "Step Light", completo: "Step Light Kikos", qtd: 2, valorUnit: 239.40 },
+        { curto: "Colchonete", completo: "Colchonete Emborrachado Pequeno", qtd: 2, valorUnit: 213.00 },
+      ] },
     ]
   },
 };
+
+const CATALOGO_ORIGINAL = JSON.parse(JSON.stringify(CATALOGO));
+
+function verificarItensEditados(combo) {
+  const atual = CATALOGO[combo];
+  const original = CATALOGO_ORIGINAL[combo];
+  let alterado = false;
+  atual.categorias.forEach((cat, catIdx) => {
+    cat.itens.forEach((item, itemIdx) => {
+      if (item.qtd !== original.categorias[catIdx].itens[itemIdx].qtd) {
+        alterado = true;
+      }
+    });
+  });
+  document.getElementById('avisoEdicaoSimulador').style.display = alterado ? 'block' : 'none';
+  return alterado;
+}
 
 // ── CLOUDCONVERT (mover para backend após testes) ──
 const CC_WORKER = 'https://withered-fire-fd56.lumno-contato.workers.dev';
 
 let promoOn = false;
+let itensEditados = false;
 
 function togglePromo() {
   promoOn = !promoOn;
@@ -180,12 +429,12 @@ function construirTabelaRef(cont, aptos) {
   const corpo = document.getElementById('tabelaRefBody');
   const comboAtivo = document.getElementById('combo').value;
   corpo.innerHTML = '';
-  Object.entries(COMBOS).forEach(([nome, d]) => {
-    const mensCli = d.mens - (cont === 'NAO' ? d.alu : 0);
-    const minApto = aptos > 0 ? mensCli / aptos : 0;
+  Object.keys(COMBOS).forEach((nome) => {
+    const calc = calcularCascata(nome, cont === 'SIM');
+    const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
     const tr = document.createElement('tr');
     if (nome === comboAtivo) tr.classList.add('ativo');
-    tr.innerHTML = `<td>${nome}</td><td>${fmt(mensCli)}</td><td>${aptos > 0 ? fmt(minApto) : '—'}</td>`;
+    tr.innerHTML = `<td>${nome}</td><td>${fmt(calc.mensalidadeMinima)}</td><td>${aptos > 0 ? fmt(minApto) : '—'}</td>`;
     corpo.appendChild(tr);
   });
 }
@@ -197,9 +446,14 @@ function setVazio() {
   document.getElementById('prevPremiacao').textContent = '—';
   document.getElementById('prevMensTotal').className = 'preview-value muted';
   document.getElementById('prevMensTotal').textContent = '—';
+  document.getElementById('btnGerar').disabled = true;
+  document.getElementById('btnGerarPdf').disabled = true;
 }
 
 function atualizar() {
+  const comboSel = document.getElementById('combo').value;
+  verificarItensEditados(comboSel);
+
   ['nomeCondominio','aptos','valorApto','mesesPromo','mensPromo'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.value) limparErro(id);
@@ -217,32 +471,30 @@ function atualizar() {
   }
   const mPromoV = parseFloat(document.getElementById('mensPromo').value) || 0;
 
-  const d = COMBOS[combo];
-  const mensCli = d.mens - (cont === 'NAO' ? d.alu : 0);
-  const recLiq  = d.mens - d.alu;
+  const calc = calcularCascata(combo, cont === 'SIM');
+  const mensCli = calc.mensalidadeMinima;
   const minApto = aptos > 0 ? mensCli / aptos : 0;
 
   document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
   construirTabelaRef(cont, aptos);
+  renderizarDRE(combo, cont, aptos);
 
   if (!vApto || aptos === 0) { setVazio(); return; }
 
   const mensNeg = vApto * aptos;
-  let contNeg;
-  if (promoOn && mPromo > 0 && mPromoV > 0) {
-    const mensPromoTotal = mPromoV * aptos;
-    contNeg = (mPromo * mensPromoTotal) + ((prazo - mPromo) * mensNeg);
-  } else {
-    contNeg = mensNeg * prazo;
-  }
+  const contNeg = mensNeg;
 
-  const contMin  = recLiq * prazo;
+  const contMin = calc.mensalidadeMinima;
   const extra    = Math.max(0, contNeg - contMin);
   const comBase  = contNeg * BASE;
   const comBonus = extra * BONUS;
   const comTotal = comBase + comBonus;
-  const comCSS   = comTotal * CSS_SPLIT;
+  const comCSS   = comTotal;
   const pct = vApto / minApto - 1;
+  const abaixoDoMinimo = vApto < minApto;
+
+  document.getElementById('btnGerar').disabled = abaixoDoMinimo;
+  document.getElementById('btnGerarPdf').disabled = abaixoDoMinimo;
 
   let statusClass, statusTxt;
   if (vApto < minApto) {
@@ -299,16 +551,73 @@ function abrirModal() {
   document.getElementById('modalTagCombo').textContent = cat.tag;
   const grid = document.getElementById('modalEquipGrid');
   grid.innerHTML = '';
-  cat.categorias.forEach(c => {
+  cat.categorias.forEach((c, catIdx) => {
     const card = document.createElement('div');
     card.className = 'modal-equip-card';
     card.innerHTML = `<div class="modal-equip-titulo">${c.nome}</div>` +
-      c.itens.map(([nome, qty]) =>
-        `<div class="modal-equip-item"><span>${nome}</span><span class="modal-equip-qty">${qty}</span></div>`
+      c.itens.map((item, itemIdx) =>
+        `<div class="modal-equip-item">
+          <span>${item.curto}</span>
+          <span class="modal-equip-direita">
+            <span class="modal-equip-qty">×${item.qtd}</span>
+            <button class="modal-equip-editar" onclick="abrirEdicaoItem('${combo}',${catIdx},${itemIdx})">Editar</button>
+          </span>
+        </div>`
       ).join('');
     grid.appendChild(card);
   });
   document.getElementById('modalOverlay').classList.add('aberto');
+}
+
+function abrirEdicaoItem(combo, catIdx, itemIdx) {
+  const item = CATALOGO[combo].categorias[catIdx].itens[itemIdx];
+  document.getElementById('edicaoNomeCompleto').textContent = item.completo;
+  document.getElementById('edicaoQtd').value = item.qtd;
+  document.getElementById('edicaoOverlay').dataset.combo = combo;
+  document.getElementById('edicaoOverlay').dataset.cat = catIdx;
+  document.getElementById('edicaoOverlay').dataset.item = itemIdx;
+  document.getElementById('edicaoValorUnit').textContent = fmt(item.valorUnit);
+  document.getElementById('edicaoValorTotal').textContent = fmt(item.valorUnit * item.qtd);
+  document.getElementById('avisoEspacoEdicao').style.display = 'none';
+  document.getElementById('edicaoOverlay').classList.add('aberto');
+}
+
+function atualizarPreviewValorEdicao() {
+  const overlay = document.getElementById('edicaoOverlay');
+  const combo   = overlay.dataset.combo;
+  const catIdx  = parseInt(overlay.dataset.cat);
+  const itemIdx = parseInt(overlay.dataset.item);
+  const item = CATALOGO[combo].categorias[catIdx].itens[itemIdx];
+  const novaQtd = parseInt(document.getElementById('edicaoQtd').value) || 0;
+  document.getElementById('edicaoValorTotal').textContent = fmt(item.valorUnit * novaQtd);
+
+  const aviso = document.getElementById('avisoEspacoEdicao');
+  if (novaQtd !== item.qtd) {
+    aviso.style.display = 'block';
+  } else {
+    aviso.style.display = 'none';
+  }
+}
+function fecharEdicaoItem() {
+  document.getElementById('edicaoOverlay').classList.remove('aberto');
+}
+
+function confirmarEdicaoItem() {
+  const overlay = document.getElementById('edicaoOverlay');
+  const combo   = overlay.dataset.combo;
+  const catIdx  = parseInt(overlay.dataset.cat);
+  const itemIdx = parseInt(overlay.dataset.item);
+  const novaQtd = parseInt(document.getElementById('edicaoQtd').value);
+
+  if (!novaQtd || novaQtd < 0) {
+    alert('Informe uma quantidade válida.');
+    return;
+  }
+
+  CATALOGO[combo].categorias[catIdx].itens[itemIdx].qtd = novaQtd;
+  verificarItensEditados(combo);
+  fecharEdicaoItem();
+  abrirModal();
 }
 
 function fecharModal() {
@@ -422,6 +731,15 @@ function validarCampos() {
     setErro('valorApto', 'Informe um valor por unidade válido (maior que zero).');
     primeiroInvalido = primeiroInvalido || 'valorApto';
     valido = false;
+  } else {
+    const comboV = document.getElementById('combo').value;
+    const contV  = document.getElementById('container').value;
+    const minAptoV = calcularCascata(comboV, contV === 'SIM').mensalidadeMinima / (aptos || 1);
+    if (aptos > 0 && vApto < minAptoV) {
+      setErro('valorApto', `Valor abaixo do mínimo permitido para este combo (${fmt(minAptoV)} por unidade).`);
+      primeiroInvalido = primeiroInvalido || 'valorApto';
+      valido = false;
+    }
   }
 
   if (promoOn) {
@@ -442,9 +760,9 @@ function validarCampos() {
       const combo   = document.getElementById('combo').value;
       const cont    = document.getElementById('container').value;
       const aptosV  = parseFloat(document.getElementById('aptos').value) || 0;
-      const d       = COMBOS[combo];
-      const mensCli = d.mens - (cont === 'NAO' ? d.alu : 0);
-      const minApto = aptosV > 0 ? mensCli / aptosV : 0;
+      const mensCliV = calcularCascata(combo, cont === 'SIM').mensalidadeMinima;
+      const minApto = aptosV > 0 ? mensCliV / aptosV : 0;
+
       if (minApto > 0 && vPromo < minApto) {
         setErro('mensPromo', `Valor promocional abaixo do mínimo permitido (${fmt(minApto)} por unidade).`);
         primeiroInvalido = primeiroInvalido || 'mensPromo';
@@ -573,6 +891,9 @@ async function gerarPDF() {
   if (!verificarRateLimit()) return;
   if (COMBOS_PENDENTES.includes(combo)) { alert('Combo ' + combo + ' ainda não disponível.'); return; }
 
+  // Abre a aba já no clique do usuário, para não ser bloqueada como popup
+  const novaAba = window.open('', '_blank');
+
   // Estado de carregamento
   btnPdf.classList.add('loading');
   btnPdf.disabled = true;
@@ -651,18 +972,25 @@ async function gerarPDF() {
     const pdfRes = await fetch(pdfUrl);
     const pdfBlob = await pdfRes.blob();
 
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); 
-    URL.revokeObjectURL(url);
+    // Salvar primeiro — garante que Storage e Firestore sejam gravados
+    // mesmo que o navegador mobile abra/troque de aba no passo seguinte
     await salvarNoStorage(pdfBlob, `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`, 'PDF');
     salvarHistorico('PDF');
     await registrarLog(combo, nomeRaw, 'PDF', `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`);
 
-  } catch(e) {
+    // Exibir na aba já aberta, mantendo o simulador na aba original
+    const url = URL.createObjectURL(pdfBlob);
+    if (novaAba) {
+      novaAba.location.href = url;
+    } else {
+      // fallback caso o navegador tenha bloqueado a abertura antecipada
+      window.open(url, '_blank', 'noopener');
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    
+
+    } catch(e) {
+    if (novaAba) novaAba.close();
     alert('Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.');
     console.error(e);
   } finally {
@@ -725,6 +1053,9 @@ function limparFormulario() {
   document.getElementById('mensPromo').value      = '';
 
   if (promoOn) togglePromo();
+
+  itensEditados = false;
+  document.getElementById('avisoEdicaoSimulador').style.display = 'none';
 
   limparTodosErros();
   atualizar();
@@ -854,6 +1185,11 @@ window.abrirHistorico   = abrirHistorico;
 window.fecharHistorico  = fecharHistorico;
 window.fecharHistoricoFora = fecharHistoricoFora;
 window.irParaAdmin = irParaAdmin;
+window.abrirEdicaoItem    = abrirEdicaoItem;
+window.fecharEdicaoItem   = fecharEdicaoItem;
+window.confirmarEdicaoItem = confirmarEdicaoItem;
+window.atualizarPreviewValorEdicao = atualizarPreviewValorEdicao;
+
 
 // ── HEARTBEAT ONLINE ──
 async function iniciarHeartbeat(user) {
