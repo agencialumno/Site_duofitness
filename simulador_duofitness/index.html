@@ -72,13 +72,9 @@
       </table>
     </div>
 
-    <button class="btn-detalhes" id="btnDetalhes" onclick="abrirModal()">
+<button class="btn-detalhes" id="btnDetalhes" onclick="abrirModal()">
   ☰ Ver equipamentos do combo selecionado
 </button>
-
-<div class="aviso-combo" id="avisoEdicaoSimulador" style="display:none; margin-top: 12px;">
-  ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
-</div>
 
 <button class="btn-admin" id="btnAdmin" onclick="irParaAdmin()">Painel Admin</button>
   </div>
@@ -198,6 +194,10 @@
         </div>
       </div>
     </div>
+
+  <div class="aviso-edicao-form" id="avisoEdicaoSimulador" style="display:none;">
+    ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
+  </div>
 
   <button class="btn-gerar" id="btnGerar" onclick="gerarProposta()">
   <div class="spinner"></div>

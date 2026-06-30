@@ -625,7 +625,7 @@ function confirmarEdicaoItem() {
   const itemIdx = parseInt(overlay.dataset.item);
   const novaQtd = parseInt(document.getElementById('edicaoQtd').value);
 
-  if (!novaQtd || novaQtd < 0) {
+  if (novaQtd === undefined || novaQtd === null || isNaN(novaQtd) || novaQtd < 0) {
     alert('Informe uma quantidade válida.');
     return;
   }

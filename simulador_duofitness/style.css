@@ -476,12 +476,23 @@ select option { background: #1a1a1a; }
 .btn-gerar.loading .spinner { display: block; }
 .btn-gerar.loading .btn-lbl { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.aviso-combo {
-  display: none;
-  font-size: 12px;
+.aviso-edicao-form {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--laranja-dim);
+  border: 1px solid var(--laranja);
+  border-radius: 10px;
   color: var(--laranja);
+  font-size: 13px;
+  font-weight: 700;
   text-align: center;
-  margin-top: 8px;
+  letter-spacing: .02em;
+}
+
+html.tema-claro .aviso-edicao-form {
+  background: rgba(180,100,0,0.10);
+  border-color: #b35c00;
+  color: #b35c00;
 }
 
 /* ── MODAL EQUIPAMENTOS ── */
