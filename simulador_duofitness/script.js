@@ -633,7 +633,7 @@ function fmtBRL(v) {
 }
 
 // ── GERA O ZIP COM O PPTX PREENCHIDO (reutilizado por PPTX e PDF) ──
-async function gerarZip(combo, nomeRaw, aptos, vApto, prazo) {
+async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPromo, valorPromo) {
   const arquivo = combo.toLowerCase();
 
   if (!window.JSZip) {
@@ -655,12 +655,22 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo) {
   const mensCond = 'R$ ' + fmtBRL(vApto * aptos);
   const aptosStr = String(Math.round(aptos));
 
+  const mesesPromoNum = promoAtiva ? Math.min(parseInt(mesesPromo) || 0, 6) : 0;
+  const promoMesTxt   = mesesPromoNum > 0
+    ? `${mesesPromoNum} ${mesesPromoNum === 1 ? 'mês' : 'meses'}`
+    : 'Não se aplica';
+  const promoValorTxt = (promoAtiva && valorPromo > 0)
+    ? 'R$ ' + fmtBRL(valorPromo) + ' por unidade'
+    : 'Não se aplica';
+
   const valores = {
-    NOME:       nome,
-    VALOR:      mensApto,
-    VALOR_COND: mensCond,
-    UNIDADES:   aptosStr,
-    PRAZO:      `${prazo} meses`,
+    NOME:        nome,
+    VALOR:       mensApto,
+    VALOR_COND:  mensCond,
+    UNIDADES:    aptosStr,
+    PRAZO:       `${prazo} meses`,
+    PROMO_MES:   promoMesTxt,
+    PROMO_VALOR: promoValorTxt,
   };
 
   const slides = Object.keys(zip.files).filter(
@@ -836,6 +846,8 @@ async function gerarProposta() {
   const vApto   = parseFloat(document.getElementById('valorApto').value) || 0;
   const combo   = document.getElementById('combo').value;
   const prazo = parseInt(document.getElementById('prazo').value);
+  const mesesPromo = document.getElementById('mesesPromo').value;
+  const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
 
   if (!validarCampos()) return;
   if (!verificarRateLimit()) return;
@@ -847,7 +859,7 @@ async function gerarProposta() {
   lblBtn.textContent = 'Gerando proposta...';
 
   try {
-    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo);
+    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo);
 
     const blob = await zip.generateAsync({
       type: 'blob',
@@ -886,6 +898,8 @@ async function gerarPDF() {
   const vApto   = parseFloat(document.getElementById('valorApto').value) || 0;
   const combo   = document.getElementById('combo').value;
   const prazo = parseInt(document.getElementById('prazo').value);
+  const mesesPromo = document.getElementById('mesesPromo').value;
+  const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
 
   if (!validarCampos()) return;
   if (!verificarRateLimit()) return;
@@ -901,7 +915,7 @@ async function gerarPDF() {
 
   try {
     // 1. Gerar o PPTX preenchido em memória
-    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto);
+    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo);
     const pptxBlob = await zip.generateAsync({
       type: 'blob',
       mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
