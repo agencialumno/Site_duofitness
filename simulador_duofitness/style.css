@@ -711,12 +711,16 @@ select option { background: #1a1a1a; }
   }
 
   /* Tabela */
-  .preview-card table {
+.preview-card table {
     min-width: 500px;
   }
 
   .ref-table {
     min-width: 500px;
+  }
+
+  .preview-card .dre-table {
+    min-width: 0;
   }
 
   .preview-card {
@@ -1515,17 +1519,26 @@ html.tema-claro .modal-titulo-combo {
 }
 
 /* ── TABELA DRE (memória de cálculo) ── */
+.dre-table {
+  table-layout: fixed;
+  width: 100%;
+}
 .dre-table td {
-  font-size: 12px;
-  padding: 7px 10px;
+  font-size: 11px;
+  padding: 7px 4px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
 }
 .dre-table td:first-child {
   font-weight: 400;
   color: var(--muted);
+  width: 62%;
 }
 .dre-table td:last-child {
   text-align: right;
   font-weight: 500;
+  width: 38%;
 }
 .dre-table tr.dre-subtotal td {
   font-weight: 700;
