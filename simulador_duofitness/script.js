@@ -116,24 +116,22 @@ const BONUS      = 0.002;
 // Calcula a cascata completa de um combo e retorna cada etapa para uso na tabela e na DRE.
 function calcularCascata(combo, temContainer) {
   const d = COMBOS[combo];
-  const subtotalBase = d.parcela + d.manutencao + (temContainer ? d.container : 0);
-  const apoMargem    = subtotalBase * MARGEM_FRANQUEADO;
-  const subtotalMargem = subtotalBase + apoMargem;
-  const apoRoyalties = subtotalMargem * ROYALTIES;
-  const subtotalRoyalties = subtotalMargem + apoRoyalties;
-  const apoImposto   = subtotalRoyalties * IMPOSTO_NF;
-  const mensalidadeMinima = subtotalRoyalties + apoImposto;
+  const subtotalCusto = d.parcela + d.manutencao + (temContainer ? d.container : 0);
+  const lucroFranqueado = subtotalCusto * MARGEM_FRANQUEADO;
+  const subtotalComLucro = subtotalCusto + lucroFranqueado;
+  const mensalidadeMinima = subtotalComLucro / (1 - ROYALTIES - IMPOSTO_NF);
+  const royalties = mensalidadeMinima * ROYALTIES;
+  const imposto = mensalidadeMinima * IMPOSTO_NF;
 
   return {
     parcela: d.parcela,
     manutencao: d.manutencao,
     container: temContainer ? d.container : 0,
-    subtotalBase,
-    margem: apoMargem,
-    subtotalMargem,
-    royalties: apoRoyalties,
-    subtotalRoyalties,
-    imposto: apoImposto,
+    subtotalCusto,
+    lucroFranqueado,
+    subtotalComLucro,
+    royalties,
+    imposto,
     mensalidadeMinima,
   };
 }
@@ -164,12 +162,11 @@ function renderizarDRE(combo, cont, aptos) {
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
     { label: '(+) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
-    { label: 'Subtotal', valor: calc.subtotalBase, destaque: true },
-    { label: '(+) Margem do franqueado (30%)', valor: calc.margem },
-    { label: 'Subtotal', valor: calc.subtotalMargem, destaque: true },
-    { label: '(+) Royalties (8%)', valor: calc.royalties },
-    { label: 'Subtotal', valor: calc.subtotalRoyalties, destaque: true },
-    { label: '(+) Imposto / NF (6,5%)', valor: calc.imposto },
+    { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
+    { label: '(+) Lucro do franqueado (30% sobre custos)', valor: calc.lucroFranqueado },
+    { label: 'Subtotal com lucro', valor: calc.subtotalComLucro, destaque: true },
+    { label: '(-) Royalties sobre faturamento (8%)', valor: calc.royalties },
+    { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
     { label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true },
     { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
   ];
@@ -449,6 +446,18 @@ function togglePromo() {
 function fmt(v) {
   return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+function aplicarPermissoes(role) {
+  // DRE: visível para admin e franqueado
+  const cardDRE = document.getElementById('tabelaDRE')?.closest('.preview-card');
+  if (cardDRE) cardDRE.style.display = (role === 'admin' || role === 'franqueado') ? '' : 'none';
+
+  // Premiação: visível para admin e vendedor
+  const cardPremiacao = document.getElementById('prevPremiacao')?.closest('.preview-card');
+  if (cardPremiacao) cardPremiacao.style.display = (role === 'admin' || role === 'vendedor') ? '' : 'none';
+}
+
+window.aplicarPermissoes = aplicarPermissoes;
 
 function construirTabelaRef(cont, aptos) {
   const corpo = document.getElementById('tabelaRefBody');

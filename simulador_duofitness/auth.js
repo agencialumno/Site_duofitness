@@ -27,12 +27,15 @@ const provider = new GoogleAuthProvider();
 
 async function emailAutorizado(email) {
   try {
-    const q = query(
-      collection(db, 'usuarios_autorizados'),
-      where('email', '==', email.toLowerCase())
-    );
-    const snap = await getDocs(q);
-    return !snap.empty;
+    const emailLower = email.toLowerCase();
+
+    const [snapUsuarios, snapAdmins, snapFranqueados] = await Promise.all([
+      getDocs(query(collection(db, 'usuarios_autorizados'), where('email', '==', emailLower))),
+      getDocs(query(collection(db, 'admins'), where('email', '==', emailLower))),
+      getDocs(query(collection(db, 'franqueados'), where('email', '==', emailLower))),
+    ]);
+
+    return !snapUsuarios.empty || !snapAdmins.empty || !snapFranqueados.empty;
   } catch(e) {
     console.error('Erro ao verificar autorização:', e);
     return false;
@@ -138,11 +141,25 @@ function verificarAuth() {
         : user.email.split('@')[0];
       nomeEl.textContent = `Olá, ${nome}!`;
     }
-    // Mostrar botão admin se for admin
+    // Detectar role e aplicar permissões
     const qAdmin = query(collection(db, 'admins'), where('email', '==', user.email.toLowerCase()));
     const snapAdmin = await getDocs(qAdmin);
+
+    let role = 'vendedor';
+    if (!snapAdmin.empty) {
+      role = 'admin';
+    } else {
+      const qFranqueado = query(collection(db, 'franqueados'), where('email', '==', user.email.toLowerCase()));
+      const snapFranqueado = await getDocs(qFranqueado);
+      if (!snapFranqueado.empty) role = 'franqueado';
+    }
+
+    window.userRole = role;
+
     const btnAdmin = document.getElementById('btnAdmin');
-    if (btnAdmin && !snapAdmin.empty) btnAdmin.style.display = 'block';
+    if (btnAdmin) btnAdmin.style.display = role === 'admin' ? 'block' : 'none';
+
+    if (typeof window.aplicarPermissoes === 'function') window.aplicarPermissoes(role);
   });
 }
 async function logout() {
