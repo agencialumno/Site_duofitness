@@ -110,8 +110,8 @@ const MARGEM_FRANQUEADO = 0.30;
 const ROYALTIES         = 0.08;
 const IMPOSTO_NF         = 0.065;
 
-const BASE       = 0.005;
-const BONUS      = 0.005;
+const BASE       = 0.002;
+const BONUS      = 0.002;
 
 // Calcula a cascata completa de um combo e retorna cada etapa para uso na tabela e na DRE.
 function calcularCascata(combo, temContainer) {
@@ -163,7 +163,7 @@ function renderizarDRE(combo, cont, aptos) {
   const linhas = [
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
-    { label: '(+) Container' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
+    { label: '(+) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: 'Subtotal', valor: calc.subtotalBase, destaque: true },
     { label: '(+) Margem do franqueado (30%)', valor: calc.margem },
     { label: 'Subtotal', valor: calc.subtotalMargem, destaque: true },
@@ -507,9 +507,9 @@ function atualizar() {
   if (!vApto || aptos === 0) { setVazio(); return; }
 
   const mensNeg = vApto * aptos;
-  const contNeg = mensNeg;
+  const contNeg = mensNeg * prazo;
 
-  const contMin = calc.mensalidadeMinima;
+  const contMin = calc.mensalidadeMinima * prazo;
   const extra    = Math.max(0, contNeg - contMin);
   const comBase  = contNeg * BASE;
   const comBonus = extra * BONUS;
