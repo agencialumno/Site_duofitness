@@ -1050,7 +1050,7 @@ async function gerarPDF() {
     salvarHistorico('PDF');
     await registrarLog(combo, nomeRaw, 'PDF', `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`);
 
-    // Download direto, mesmo padrão usado no PPTX
+    // Download direto, mesmo padrão usado no PPTx
     const url = URL.createObjectURL(pdfBlob);
     const a = document.createElement('a');
     a.href = url;
