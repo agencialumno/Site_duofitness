@@ -523,8 +523,7 @@ function atualizar() {
   const mensCli = calc.mensalidadeMinima;
   const minApto = aptos > 0 ? mensCli / aptos : 0;
 
-  const minAptoCeil = aptos > 0 ? Math.ceil(minApto * 100) / 100 : 0;
-  document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minAptoCeil) : '—';
+  document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
   construirTabelaRef(cont, aptos);
   renderizarDRE(combo, cont, aptos, vApto > 0 && aptos > 0 ? vApto * aptos : 0);
 
