@@ -172,18 +172,21 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
     { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
     { label: '(+) Lucro do franqueado (30%)', valor: calc.lucroFranqueado },
     { label: 'Subtotal com lucro', valor: calc.subtotalComLucro, destaque: true },
-    ...(!temIncremental ? [
-      { label: '(-) Royalties sobre faturamento (8%)', valor: royaltiesDRE },
-    ] : []),
-    { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
-    { label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true },
-    { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
-    { label: 'Receita incremental', valor: receitaIncremental, total: true },
-    ...(temIncremental ? [
-      { label: 'Lucro total do franqueado', valor: lucroTotal, total: true },
-      { label: '(-) Royalties (8%)', valor: royaltiesDRE },
-    ] : []),
   ];
+
+  if (!temIncremental) {
+    linhas.push({ label: '(-) Royalties sobre faturamento (8%)', valor: royaltiesDRE });
+  }
+
+  linhas.push({ label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto });
+  linhas.push({ label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true });
+  linhas.push({ label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true });
+  linhas.push({ label: 'Receita incremental', valor: receitaIncremental, total: true });
+
+  if (temIncremental) {
+    linhas.push({ label: 'Lucro total do franqueado', valor: lucroTotal, total: true });
+    linhas.push({ label: '(-) Royalties (8%)', valor: royaltiesDRE });
+  }
 
   corpo.innerHTML = linhas.map(l => `
     <tr class="${l.total ? 'dre-total' : ''} ${l.destaque ? 'dre-subtotal' : ''}">
