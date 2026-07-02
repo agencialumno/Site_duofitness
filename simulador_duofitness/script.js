@@ -968,9 +968,6 @@ async function gerarPDF() {
   if (!verificarRateLimit()) return;
   if (COMBOS_PENDENTES.includes(combo)) { alert('Combo ' + combo + ' ainda não disponível.'); return; }
 
-  // Abre a aba já no clique do usuário, para não ser bloqueada como popup
-  const novaAba = window.open('', '_blank');
-
   // Estado de carregamento
   btnPdf.classList.add('loading');
   btnPdf.disabled = true;
@@ -1049,25 +1046,21 @@ async function gerarPDF() {
     const pdfRes = await fetch(pdfUrl);
     const pdfBlob = await pdfRes.blob();
 
-    // Salvar primeiro — garante que Storage e Firestore sejam gravados
-    // mesmo que o navegador mobile abra/troque de aba no passo seguinte
     await salvarNoStorage(pdfBlob, `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`, 'PDF');
     salvarHistorico('PDF');
     await registrarLog(combo, nomeRaw, 'PDF', `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`);
 
-    // Exibir na aba já aberta, mantendo o simulador na aba original
+    // Download direto, mesmo padrão usado no PPTX
     const url = URL.createObjectURL(pdfBlob);
-    if (novaAba) {
-      novaAba.location.href = url;
-    } else {
-      // fallback caso o navegador tenha bloqueado a abertura antecipada
-      window.open(url, '_blank', 'noopener');
-    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 60000);
     
 
     } catch(e) {
-    if (novaAba) novaAba.close();
     alert('Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.');
     console.error(e);
   } finally {
