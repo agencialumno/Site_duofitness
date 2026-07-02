@@ -158,6 +158,13 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const calc = calcularCascata(combo, cont === 'SIM');
   const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
 
+  const receitaIncremental = mensNeg > 0 ? Math.max(0, mensNeg - calc.mensalidadeMinima) : 0;
+  const temIncremental = receitaIncremental > 0;
+  const lucroTotal = calc.lucroFranqueado + receitaIncremental;
+  const royaltiesDRE = temIncremental
+    ? (lucroTotal - calc.manutencao) * ROYALTIES
+    : calc.royalties;
+
   const linhas = [
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
@@ -165,12 +172,17 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
     { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
     { label: '(+) Lucro do franqueado (30%)', valor: calc.lucroFranqueado },
     { label: 'Subtotal com lucro', valor: calc.subtotalComLucro, destaque: true },
-    { label: '(-) Royalties sobre faturamento (8%)', valor: calc.royalties },
+    ...(!temIncremental ? [
+      { label: '(-) Royalties sobre faturamento (8%)', valor: royaltiesDRE },
+    ] : []),
     { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
     { label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true },
     { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
-    { label: 'Receita incremental', valor: mensNeg > 0 ? mensNeg - calc.mensalidadeMinima : 0, total: true },
-    { label: 'Lucro total do franqueado', valor: calc.lucroFranqueado + (mensNeg > 0 ? mensNeg - calc.mensalidadeMinima : 0), total: true },
+    { label: 'Receita incremental', valor: receitaIncremental, total: true },
+    ...(temIncremental ? [
+      { label: 'Lucro total do franqueado', valor: lucroTotal, total: true },
+      { label: '(-) Royalties (8%)', valor: royaltiesDRE },
+    ] : []),
   ];
 
   corpo.innerHTML = linhas.map(l => `
@@ -511,7 +523,8 @@ function atualizar() {
   const mensCli = calc.mensalidadeMinima;
   const minApto = aptos > 0 ? mensCli / aptos : 0;
 
-  document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
+  const minAptoCeil = aptos > 0 ? Math.ceil(minApto * 100) / 100 : 0;
+  document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minAptoCeil) : '—';
   construirTabelaRef(cont, aptos);
   renderizarDRE(combo, cont, aptos, vApto > 0 && aptos > 0 ? vApto * aptos : 0);
 
