@@ -958,24 +958,7 @@ function atualizarStatusAba(aba, msg) {
   }
 }
 
-async function gerarPDF() {
-  const btnPdf  = document.getElementById('btnGerarPdf');
-  const lblPdf  = btnPdf.querySelector('.btn-lbl');
-  if (btnPdf.disabled) return;
-  const nomeRaw = (document.getElementById('nomeCondominio').value || '').trim();
-  const aptos   = parseFloat(document.getElementById('aptos').value) || 0;
-  const vApto   = parseFloat(document.getElementById('valorApto').value) || 0;
-  const combo   = document.getElementById('combo').value;
-  const prazo = parseInt(document.getElementById('prazo').value);
-  const mesesPromo = document.getElementById('mesesPromo').value;
-  const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
-
-  if (!validarCampos()) return;
-  if (!verificarRateLimit()) return;
-  if (COMBOS_PENDENTES.includes(combo)) { alert('Combo ' + combo + ' ainda não disponível.'); return; }
-
-  // Abre a aba já no clique do usuário (síncrono, para não ser bloqueada como popup)
-  // e escreve uma tela de loading nela até o PDF ficar pronto
+function abrirAbaLoading() {
   const novaAba = window.open('', '_blank');
   if (novaAba) {
     novaAba.document.write(`
@@ -986,16 +969,16 @@ async function gerarPDF() {
         <title>Gerando PDF...</title>
         <style>
           body { font-family: Roboto, Arial, sans-serif; background:#000; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
-          .spinner { width:88px; height:88px; border:8px solid #333; border-top-color:#fed205; border-radius:50%; animation:girar 1s linear infinite; margin-bottom:32px; }
+          .spinner { width:130px; height:130px; border:10px solid #333; border-top-color:#fed205; border-radius:50%; animation:girar 1s linear infinite; margin-bottom:40px; }
           @keyframes girar { to { transform:rotate(360deg); } }
-          .status-wrap { position:relative; height:40px; overflow:hidden; width:90%; max-width:480px; text-align:center; }
+          .status-wrap { position:relative; height:70px; overflow:hidden; width:90%; max-width:600px; text-align:center; padding:0 12px; }
           #statusMsg {
-            position:absolute; left:0; width:100%; margin:0; font-size:24px; font-weight:500;
+            position:absolute; left:0; width:100%; margin:0; font-size:38px; font-weight:600; line-height:1.2;
             transition: transform 0.35s ease, opacity 0.35s ease;
             transform: translateY(0); opacity:1;
           }
-          #statusMsg.saindo { transform: translateY(-20px); opacity:0; }
-          #statusMsg.antes-entrar { transition:none; transform: translateY(20px); opacity:0; }
+          #statusMsg.saindo { transform: translateY(-28px); opacity:0; }
+          #statusMsg.antes-entrar { transition:none; transform: translateY(28px); opacity:0; }
         </style>
       </head>
       <body>
@@ -1019,6 +1002,28 @@ async function gerarPDF() {
     `);
     novaAba.document.close();
   }
+  return novaAba;
+}
+
+async function gerarPDF() {
+  const btnPdf  = document.getElementById('btnGerarPdf');
+  const lblPdf  = btnPdf.querySelector('.btn-lbl');
+  if (btnPdf.disabled) return;
+  const nomeRaw = (document.getElementById('nomeCondominio').value || '').trim();
+  const aptos   = parseFloat(document.getElementById('aptos').value) || 0;
+  const vApto   = parseFloat(document.getElementById('valorApto').value) || 0;
+  const combo   = document.getElementById('combo').value;
+  const prazo = parseInt(document.getElementById('prazo').value);
+  const mesesPromo = document.getElementById('mesesPromo').value;
+  const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
+
+  if (!validarCampos()) return;
+  if (!verificarRateLimit()) return;
+  if (COMBOS_PENDENTES.includes(combo)) { alert('Combo ' + combo + ' ainda não disponível.'); return; }
+
+  // Abre a aba já no clique do usuário (síncrono, para não ser bloqueada como popup)
+  // e escreve uma tela de loading nela até o PDF ficar pronto
+  const novaAba = abrirAbaLoading();
 
   // Estado de carregamento
   btnPdf.classList.add('loading');
