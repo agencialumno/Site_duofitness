@@ -986,16 +986,16 @@ async function gerarPDF() {
         <title>Gerando PDF...</title>
         <style>
           body { font-family: Roboto, Arial, sans-serif; background:#000; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
-          .spinner { width:48px; height:48px; border:4px solid #333; border-top-color:#fed205; border-radius:50%; animation:girar 1s linear infinite; margin-bottom:24px; }
+          .spinner { width:88px; height:88px; border:8px solid #333; border-top-color:#fed205; border-radius:50%; animation:girar 1s linear infinite; margin-bottom:32px; }
           @keyframes girar { to { transform:rotate(360deg); } }
-          .status-wrap { position:relative; height:26px; overflow:hidden; width:300px; text-align:center; }
+          .status-wrap { position:relative; height:40px; overflow:hidden; width:90%; max-width:480px; text-align:center; }
           #statusMsg {
-            position:absolute; left:0; width:100%; margin:0; font-size:16px;
+            position:absolute; left:0; width:100%; margin:0; font-size:24px; font-weight:500;
             transition: transform 0.35s ease, opacity 0.35s ease;
             transform: translateY(0); opacity:1;
           }
-          #statusMsg.saindo { transform: translateY(-16px); opacity:0; }
-          #statusMsg.antes-entrar { transition:none; transform: translateY(16px); opacity:0; }
+          #statusMsg.saindo { transform: translateY(-20px); opacity:0; }
+          #statusMsg.antes-entrar { transition:none; transform: translateY(20px); opacity:0; }
         </style>
       </head>
       <body>
