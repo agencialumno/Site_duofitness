@@ -952,6 +952,12 @@ async function gerarProposta() {
 }
 
 // ── BAIXAR PDF VIA CLOUDCONVERT ──
+function atualizarStatusAba(aba, msg) {
+  if (aba && !aba.closed && typeof aba.trocarStatus === 'function') {
+    aba.trocarStatus(msg);
+  }
+}
+
 async function gerarPDF() {
   const btnPdf  = document.getElementById('btnGerarPdf');
   const lblPdf  = btnPdf.querySelector('.btn-lbl');
@@ -967,6 +973,52 @@ async function gerarPDF() {
   if (!validarCampos()) return;
   if (!verificarRateLimit()) return;
   if (COMBOS_PENDENTES.includes(combo)) { alert('Combo ' + combo + ' ainda não disponível.'); return; }
+
+  // Abre a aba já no clique do usuário (síncrono, para não ser bloqueada como popup)
+  // e escreve uma tela de loading nela até o PDF ficar pronto
+  const novaAba = window.open('', '_blank');
+  if (novaAba) {
+    novaAba.document.write(`
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Gerando PDF...</title>
+        <style>
+          body { font-family: Roboto, Arial, sans-serif; background:#000; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0; }
+          .spinner { width:48px; height:48px; border:4px solid #333; border-top-color:#fed205; border-radius:50%; animation:girar 1s linear infinite; margin-bottom:24px; }
+          @keyframes girar { to { transform:rotate(360deg); } }
+          .status-wrap { position:relative; height:26px; overflow:hidden; width:300px; text-align:center; }
+          #statusMsg {
+            position:absolute; left:0; width:100%; margin:0; font-size:16px;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            transform: translateY(0); opacity:1;
+          }
+          #statusMsg.saindo { transform: translateY(-16px); opacity:0; }
+          #statusMsg.antes-entrar { transition:none; transform: translateY(16px); opacity:0; }
+        </style>
+      </head>
+      <body>
+        <div class="spinner"></div>
+        <div class="status-wrap"><p id="statusMsg">Gerando sua proposta em PDF...</p></div>
+        <script>
+          function trocarStatus(txt) {
+            var el = document.getElementById('statusMsg');
+            el.classList.add('saindo');
+            setTimeout(function() {
+              el.textContent = txt;
+              el.classList.add('antes-entrar');
+              el.classList.remove('saindo');
+              void el.offsetWidth;
+              el.classList.remove('antes-entrar');
+            }, 350);
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    novaAba.document.close();
+  }
 
   // Estado de carregamento
   btnPdf.classList.add('loading');
@@ -1008,6 +1060,7 @@ async function gerarPDF() {
 
     if (!jobRes.ok) throw new Error('Erro ao criar job no CloudConvert.');
     const job = await jobRes.json();
+    atualizarStatusAba(novaAba, 'Enviando arquivo para conversão...');
 
     // 3. Fazer upload do PPTX
     const uploadTask = job.data.tasks.find(t => t.name === 'upload-pptx');
@@ -1024,6 +1077,7 @@ async function gerarPDF() {
     // 4. Aguardar conversão (polling)
     const jobId = job.data.id;
     let exportTask = null;
+    atualizarStatusAba(novaAba, 'Convertendo para PDF...');
     for (let i = 0; i < 30; i++) {
       await new Promise(r => setTimeout(r, 2000));
       const statusRes = await fetch(`${CC_WORKER}/jobs/${jobId}`, {
@@ -1046,21 +1100,23 @@ async function gerarPDF() {
     const pdfRes = await fetch(pdfUrl);
     const pdfBlob = await pdfRes.blob();
 
+    atualizarStatusAba(novaAba, 'Quase lá, finalizando...');
     await salvarNoStorage(pdfBlob, `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`, 'PDF');
     salvarHistorico('PDF');
     await registrarLog(combo, nomeRaw, 'PDF', `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`);
 
-    // Download direto, mesmo padrão usado no PPTx
+    // Exibe o PDF na aba já aberta, mantendo o simulador na aba original
     const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
+    if (novaAba) {
+      novaAba.location.href = url;
+    } else {
+      // fallback caso o navegador tenha bloqueado a abertura antecipada
+      window.open(url, '_blank', 'noopener');
+    }
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    
 
     } catch(e) {
+    if (novaAba) novaAba.close();
     alert('Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.');
     console.error(e);
   } finally {
