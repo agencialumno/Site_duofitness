@@ -152,7 +152,7 @@ function recalcularParcela(combo) {
   COMBOS[combo].parcela = Math.max(0, novaParcela);
 }
 
-function renderizarDRE(combo, cont, aptos) {
+function renderizarDRE(combo, cont, aptos, mensNeg) {
   const corpo = document.getElementById('tabelaDREBody');
   if (!corpo) return;
   const calc = calcularCascata(combo, cont === 'SIM');
@@ -163,12 +163,14 @@ function renderizarDRE(combo, cont, aptos) {
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
     { label: '(+) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
-    { label: '(+) Lucro do franqueado (30% sobre custos)', valor: calc.lucroFranqueado },
+    { label: '(+) Lucro do franqueado (30%)', valor: calc.lucroFranqueado },
     { label: 'Subtotal com lucro', valor: calc.subtotalComLucro, destaque: true },
     { label: '(-) Royalties sobre faturamento (8%)', valor: calc.royalties },
     { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
     { label: 'Mensalidade mínima do condomínio', valor: calc.mensalidadeMinima, total: true },
     { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
+    { label: 'Receita incremental', valor: mensNeg > 0 ? mensNeg - calc.mensalidadeMinima : 0, total: true },
+    { label: 'Lucro total do franqueado', valor: calc.lucroFranqueado + (mensNeg > 0 ? mensNeg - calc.mensalidadeMinima : 0), total: true },
   ];
 
   corpo.innerHTML = linhas.map(l => `
@@ -511,7 +513,7 @@ function atualizar() {
 
   document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
   construirTabelaRef(cont, aptos);
-  renderizarDRE(combo, cont, aptos);
+  renderizarDRE(combo, cont, aptos, vApto > 0 && aptos > 0 ? vApto * aptos : 0);
 
   if (!vApto || aptos === 0) { setVazio(); return; }
 
