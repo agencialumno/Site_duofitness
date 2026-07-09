@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Duo Fitness — Academia compacta em container para condomínios residenciais." />
+  <title>Duo Fitness</title>
+
+<!-- Adobe Fonts: Facto -->
+<link rel="stylesheet" href="https://use.typekit.net/mda3ytr.css" />
+
+  <link rel="stylesheet" href="style.css" />
+ <script>
+  window.addEventListener('DOMContentLoaded', function() {
+    const splash = document.getElementById('splash');
+    const video  = document.getElementById('splash-video');
+
+    // Bloqueia scroll durante o splash
+    document.body.style.overflow = 'hidden';
+
+    function esconderSplash() {
+      if (splash._escondendo) return;
+      splash._escondendo = true;
+      document.body.style.overflow = ''; // Libera scroll
+      splash.style.transition = 'opacity 0.8s ease';
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 1000);
+    }
+
+    if (video.ended) {
+      esconderSplash();
+    } else {
+      video.addEventListener('ended', esconderSplash);
+      video.addEventListener('error', esconderSplash);
+      video.addEventListener('loadedmetadata', () => {
+        setTimeout(esconderSplash, (video.duration * 1000) + 500);
+      });
+      setTimeout(esconderSplash, 15000);
+    }
+  });
+</script>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<section id="splash">
+  <video id="splash-video" src="assets/video/splash.mp4" autoplay muted playsinline></video>
+</section>
+
+<!-- HERO -->
+<section id="hero">
+  <div id="hero-imagem">
+    <img src="assets/images/Hero.png" alt="Academia Duo Fitness" />
+    <p id="hero-headline">O futuro do<br>seu condomínio<br><em>começa aqui.</em></p>
+  </div>
+  <div id="hero-texto">
+    <h1 id="hero-titulo">Comodidade, segurança e <em>Wellness</em> a poucos metros de casa.</h1>
+    <p id="hero-subtitulo" class="subtitulo">Treinar nunca foi tão fácil e conveniente.</p>
+    <div id="hero-scroll">
+      <span id="hero-scroll-texto">Role e Descubra</span>
+      <span id="hero-seta">&#8595;</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONCEITO -->
+<section id="conceito">
+  <div id="conceito-texto">
+    <div id="conceito-hexagonos">
+  <img src="assets/images/hexagonal.png" alt="" />
+</div>
+    <h2><em>Uma academia<br>completa</em>, sem sair<br>do seu condomínio.</h2>
+    <p class="subtitulo">Leve uma <strong>academia 24h completa</strong> para o seu condomínio, sem se preocupar com <strong>manutenção, troca de equipamentos ou obras caras.</strong></p>
+    <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" class="btn-conceito">Quero valorizar meu condomínio</a>
+  </div>
+  <div id="conceito-imagem">
+    <img src="assets/images/galeria-02.png" alt="Academia Duo Fitness" />
+    <div id="conceito-imagem-overlay"></div>
+    <div id="conceito-impacto">
+      <p><em>Pague menos</em> que<br>uma pizza por<br>apartamento</p>
+    </div>
+  </div>
+</section>
+
+<button id="conceito-fechar" aria-label="Fechar imagem">X</button>
+
+<!-- GALERIA WRAPPER -->
+<div id="galeria-wrapper">
+
+  <!-- GALERIA INTRO -->
+  <section id="galeria-intro">
+    <div id="galeria-intro-conteudo">
+      <div id="galeria-ticker">
+        <span>Cada detalhe pensado para você&nbsp;&nbsp;·&nbsp;&nbsp;Equipamentos novos&nbsp;&nbsp;·&nbsp;&nbsp;Ambiente confortável&nbsp;&nbsp;·&nbsp;&nbsp;Manutenção inclusa&nbsp;&nbsp;·&nbsp;&nbsp;Valorização para o seu condomínio&nbsp;&nbsp;·&nbsp;&nbsp;Academia completa 24h&nbsp;&nbsp;·&nbsp;&nbsp;Instalação sem obras&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+        <span aria-hidden="true">Controle de acesso automático&nbsp;&nbsp;·&nbsp;&nbsp;Equipamentos novos&nbsp;&nbsp;·&nbsp;&nbsp;Ambiente profissional&nbsp;&nbsp;·&nbsp;&nbsp;Manutenção inclusa&nbsp;&nbsp;·&nbsp;&nbsp;Valorização para o seu condomínio&nbsp;&nbsp;·&nbsp;&nbsp;Aplicativo exclusivo&nbsp;&nbsp;·&nbsp;&nbsp;Instalação sem obras&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERIA FOTOS -->
+  <section id="galeria">
+    <div class="galeria-item" data-index="0">
+      <img src="assets/images/galeria-01.png" alt="Duo Fitness" />
+      <div class="galeria-overlay"></div>
+    </div>
+    <div class="galeria-item" data-index="1">
+      <img src="assets/images/galeria-04.png" alt="Duo Fitness" />
+      <div class="galeria-overlay"></div>
+    </div>
+    <div class="galeria-item" data-index="2">
+      <img src="assets/images/galeria-05.png" alt="Duo Fitness" />
+      <div class="galeria-overlay"></div>
+    </div>
+    <div class="galeria-item" data-index="3">
+      <img src="assets/images/galeria-06.png" alt="Duo Fitness" />
+      <div class="galeria-overlay"></div>
+    </div>
+  </section>
+
+  <div id="galeria-dots">
+    <span class="galeria-dot ativo"></span>
+    <span class="galeria-dot"></span>
+    <span class="galeria-dot"></span>
+    <span class="galeria-dot"></span>
+  </div>
+
+</div>
+<button id="galeria-fechar" aria-label="Fechar imagem">X</button>
+
+<!-- FAIXA SEPARADORA -->
+<div id="faixa-separadora"></div>
+
+<!-- COMBOS -->
+<section id="combos">
+  <div id="combos-esquerdo">
+    <div id="combos-header">
+      <p id="combos-titulo-fixo">Escolha o combo ideal para o seu condomínio.</p>
+    </div>
+
+    <div id="combos-nav">
+      <button class="combo-nav-item ativo" data-combo="uno">UNO</button>
+      <button class="combo-nav-item" data-combo="duo">DUO</button>
+      <button class="combo-nav-item" data-combo="triple">TRIPLE</button>
+      <button class="combo-nav-item" data-combo="prime">PRIME</button>
+      <button class="combo-nav-item" data-combo="elite">ELITE</button>
+    </div>
+
+    <div id="combos-conteudo">
+      <div id="combo-ativo-info">
+        <span class="combo-tag">COMBO</span>
+        <h2 id="combo-ativo-nome"><em>UNO</em></h2>
+        <p id="combo-ativo-frase"><em>O começo de tudo.</em> Completo do jeito certo.</p>
+        <ul id="combo-ativo-equip" class="combo-equip">
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Cardio</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Esteira ×1</li>
+              <li>Bike ×1</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Força</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Estação Multifuncional ×1</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Bancos</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Banco Multi Posições ×2</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Pesos Livres</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Anilha 10kg ×10</li>
+              <li>Barra W ×1</li>
+              <li>Halter 10kg ×11</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Armazenamento</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Suporte para Barras ×1</li>
+              <li>Suporte para Halteres ×1</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Puxadores</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Puxador Reto ×1</li>
+              <li>Corda ×1</li>
+              <li>Romano ×1</li>
+              <li>Tornozelo ×1</li>
+              <li>Triângulo ×1</li>
+            </ul>
+          </li>
+          <li class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+              <span>Acessórios</span>
+              <span class="accordion-icon">›</span>
+            </button>
+            <ul class="accordion-body">
+              <li>Step Light ×2</li>
+              <li>Colchonete ×2</li>
+            </ul>
+          </li>
+        </ul>
+        <div id="combo-rodape">
+          <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" id="combo-ativo-btn" class="btn-combo">Quero este combo</a>
+          <div id="combo-planta-card">
+            <div class="combo-planta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="1"/>
+                <path d="M3 9h18M9 3v18"/>
+              </svg>
+              <span id="combo-planta-medidas">12.9m x 2.44m — 29.74m²</span>
+            </div>
+            <div class="combo-planta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M5.5 21a7.5 7.5 0 0 1 13 0"/>
+              </svg>
+              <span id="combo-planta-usuarios">Até 22 usuários simultâneos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="combos-direito">
+    <div id="combo-ativo-imagem">
+      <img id="combo-img-atual" src="assets/images/desktop_uno.png" alt="Combo UNO" />
+      <img id="combo-img-prox" src="" alt="" />
+    </div>
+  </div>
+</section>
+
+ <!-- SEÇÃO APP -->
+<section id="app">
+  <div id="app-esquerdo">
+    <span id="app-tag">Aplicativo exclusivo</span>
+    <h2>Transformamos academias em <em>plataformas de wellness</em></h2>
+    <div id="app-grid">
+      <div class="app-feature">
+        <span class="app-num">1</span>
+        <div>
+          <strong>Academia</strong>
+          <p>Espaço premium homologado</p>
+        </div>
+      </div>
+      <div class="app-feature">
+        <span class="app-num">4</span>
+        <div>
+          <strong>Aplicativo</strong>
+          <p>Experiência dedicada do morador</p>
+        </div>
+      </div>
+      <div class="app-feature">
+        <span class="app-num">2</span>
+        <div>
+          <strong>Treinos</strong>
+          <p>Personalizados com IA</p>
+        </div>
+      </div>
+      <div class="app-feature">
+        <span class="app-num">5</span>
+        <div>
+          <strong>Ranking</strong>
+          <p>Engajamento gamificado</p>
+        </div>
+      </div>
+      <div class="app-feature">
+        <span class="app-num">3</span>
+        <div>
+          <strong>Desafios</strong>
+          <p>Comunidade ativa do prédio</p>
+        </div>
+      </div>
+      <div class="app-feature">
+        <span class="app-num">6</span>
+        <div>
+          <strong>Marketplace</strong>
+          <p>Personal, nutri e wellness</p>
+        </div>
+      </div>
+    </div>
+    <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" class="btn-app">Saiba mais</a>
+  </div>
+  <div id="app-direito">
+    <img src="assets/images/app-duo-fitness.png" alt="App Duo Fitness" />
+  </div>
+</section>
+
+<!-- SEÇÃO FRANQUEADOS -->
+<section id="franqueados">
+  <div id="franqueados-bg"></div>
+  <div id="franqueados-conteudo">
+    <span id="franqueados-tag">Seja um franqueado</span>
+    <h2>Expansão nacional com <em>capital franqueado</em></h2>
+    <p id="franqueados-subtitulo">Faça parte da maior plataforma de wellness residencial do Brasil. Território exclusivo, suporte completo e receita recorrente desde o primeiro condomínio.</p>
+    <div id="franqueados-grid">
+      <div class="franqueado-card">
+        <span class="franqueado-num">27</span>
+        <p>Estados-alvo para expansão</p>
+      </div>
+      <div class="franqueado-card">
+        <span class="franqueado-num">100+</span>
+        <p>Territórios exclusivos disponíveis</p>
+      </div>
+      <div class="franqueado-card">
+        <span class="franqueado-num">2.000</span>
+        <p>Meta de unidades na rede</p>
+      </div>
+    </div>
+    <div id="franqueados-beneficios">
+      <div class="franqueado-beneficio">
+        <span>›</span>
+        <p><strong>Território exclusivo</strong> — área protegida sem concorrência interna</p>
+      </div>
+      <div class="franqueado-beneficio">
+        <span>›</span>
+        <p><strong>Suporte completo</strong> — do projeto à instalação e pós-venda</p>
+      </div>
+      <div class="franqueado-beneficio">
+        <span>›</span>
+        <p><strong>Receita recorrente</strong> — contrato com o condomínio, cobrança via taxa condominial</p>
+      </div>
+      <div class="franqueado-beneficio">
+        <span>›</span>
+        <p><strong>Tecnologia inclusa</strong> — app, CRM e suporte operacional da Duo Fitness</p>
+      </div>
+    </div>
+    <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" id="franqueados-btn">Quero me tornar um franqueado</a>
+  </div>
+</section>
+<!-- CTA FINAL -->
+<section id="cta">
+  <div id="cta-bg"></div>
+  <div id="cta-imagem">
+    <img src="assets/images/cta.png" alt="Duo Fitness" />
+  </div>
+  <div id="cta-conteudo">
+    <h2>Mais do que<br>uma academia.<br><em>Um novo padrão de morar.</em></h2>
+    <p class="subtitulo">Transforme o seu condomínio e eleve a qualidade de vida dos seus moradores.</p>
+    <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" class="btn-cta">Seguir no Instagram</a>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
