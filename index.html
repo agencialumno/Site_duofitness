@@ -33,10 +33,7 @@
     } else {
       video.addEventListener('ended', esconderSplash);
       video.addEventListener('error', esconderSplash);
-      video.addEventListener('loadedmetadata', () => {
-        setTimeout(esconderSplash, (video.duration * 1000) + 500);
-      });
-      setTimeout(esconderSplash, 15000);
+      setTimeout(esconderSplash, 3000);
     }
   });
 </script>
