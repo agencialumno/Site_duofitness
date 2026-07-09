@@ -54,12 +54,13 @@ onAuthStateChanged(auth, async user => {
   await registrarOnline(user);
 
   // Carregar dados
-  await Promise.all([
-  carregarPropostas(),
-  carregarUsuarios(),
-  carregarLogs(),
-  carregarLogsLogin(),
-]);
+await Promise.all([
+    carregarPropostas(),
+    carregarUsuarios(),
+    carregarFranqueados(),
+    carregarLogs(),
+    carregarLogsLogin(),
+  ]);
 
   // Listener em tempo real para usuários online
   ouvirOnline();
@@ -279,6 +280,48 @@ window.removerUsuario = async function(id, email) {
     await deleteDoc(doc(db, 'usuarios_autorizados', id));
     await carregarUsuarios();
   } catch(e) { alert('Erro ao remover usuário.'); console.error(e); }
+};
+
+// ── FRANQUEADOS ──
+async function carregarFranqueados() {
+  const snap = await getDocs(collection(db, 'franqueados'));
+  const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  const div = document.getElementById('listaFranqueados');
+  if (!div) return;
+  if (lista.length === 0) { div.innerHTML = '<div class="vazio">Nenhum franqueado cadastrado.</div>'; return; }
+  div.innerHTML = lista.map(u => `
+    <div class="usuario-row">
+      <div class="usuario-info">
+        <div class="usuario-email">${u.email}</div>
+      </div>
+      <button class="btn-acao btn-excluir" onclick="removerFranqueado('${u.id}','${u.email}')">✕ Remover</button>
+    </div>`).join('');
+}
+
+window.adicionarFranqueado = async function() {
+  const email = document.getElementById('novoEmailFranqueado').value.trim().toLowerCase();
+  if (!email) { alert('Informe um e-mail.'); return; }
+  try {
+    await addDoc(collection(db, 'franqueados'), { email });
+    document.getElementById('novoEmailFranqueado').value = '';
+    await carregarFranqueados();
+  } catch(e) { alert('Erro ao adicionar franqueado.'); console.error(e); }
+};
+
+window.removerFranqueado = async function(id, email) {
+  if (!confirm(`Remover franqueado ${email}?`)) return;
+  try {
+    await deleteDoc(doc(db, 'franqueados', id));
+    await carregarFranqueados();
+  } catch(e) { alert('Erro ao remover franqueado.'); console.error(e); }
+};
+
+window.alternarAbaUsuarios = function(aba) {
+  document.getElementById('abaVendedores').style.display = aba === 'vendedores' ? '' : 'none';
+  document.getElementById('abaFranqueados').style.display = aba === 'franqueados' ? '' : 'none';
+  document.getElementById('btnAbaVendedores').className = aba === 'vendedores' ? 'btn-primario' : 'btn-secundario';
+  document.getElementById('btnAbaFranqueados').className = aba === 'franqueados' ? 'btn-primario' : 'btn-secundario';
 };
 
 // ── LOGS ──

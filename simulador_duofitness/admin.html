@@ -183,18 +183,42 @@
 
     <!-- ── SEÇÃO: USUÁRIOS ── -->
     <div class="secao" id="secao-usuarios">
-      <div class="card-tabela">
-        <div class="card-tabela-header">
-          <div class="card-tabela-titulo">Usuários Autorizados</div>
-        </div>
-        <div id="listaUsuarios">
-          <div class="vazio">Carregando...</div>
-        </div>
-        <div class="add-usuario-form">
-          <input type="email" id="novoEmail" placeholder="novo@email.com">
-          <button class="btn-primario" onclick="adicionarUsuario()">+ Adicionar</button>
+
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="btn-primario" id="btnAbaVendedores" onclick="alternarAbaUsuarios('vendedores')">Vendedores</button>
+        <button class="btn-secundario" id="btnAbaFranqueados" onclick="alternarAbaUsuarios('franqueados')">Franqueados</button>
+      </div>
+
+      <div id="abaVendedores">
+        <div class="card-tabela">
+          <div class="card-tabela-header">
+            <div class="card-tabela-titulo">Usuários Autorizados (Vendedores)</div>
+          </div>
+          <div id="listaUsuarios">
+            <div class="vazio">Carregando...</div>
+          </div>
+          <div class="add-usuario-form">
+            <input type="email" id="novoEmail" placeholder="novo@email.com">
+            <button class="btn-primario" onclick="adicionarUsuario()">+ Adicionar</button>
+          </div>
         </div>
       </div>
+
+      <div id="abaFranqueados" style="display:none;">
+        <div class="card-tabela">
+          <div class="card-tabela-header">
+            <div class="card-tabela-titulo">Franqueados</div>
+          </div>
+          <div id="listaFranqueados">
+            <div class="vazio">Carregando...</div>
+          </div>
+          <div class="add-usuario-form">
+            <input type="email" id="novoEmailFranqueado" placeholder="franqueado@email.com">
+            <button class="btn-primario" onclick="adicionarFranqueado()">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   <!-- ── SEÇÃO: LOGS ── -->
