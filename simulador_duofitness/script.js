@@ -815,13 +815,11 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     });
   }
 
-  // Equipamentos extras (de outros combos) — cada um em uma linha
+// Equipamentos extras (de outros combos) — nome e quantidade juntos, separados por vírgula
   if (equipamentosExtras.length > 0) {
-    valores.EQUIP_EXTRA = equipamentosExtras.map(ex => ex.curto).join('</a:p><a:p>');
-    valores.EQUIP_EXTRA_QUANT = equipamentosExtras.map(ex => String(ex.qtd)).join('</a:p><a:p>');
+    valores.EQUIP_EXTRA = equipamentosExtras.map(ex => `${ex.curto} (${ex.qtd})`).join(', ');
   } else {
     valores.EQUIP_EXTRA = '';
-    valores.EQUIP_EXTRA_QUANT = '';
   }
 
   const slides = Object.keys(zip.files).filter(
