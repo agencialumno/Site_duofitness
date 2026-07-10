@@ -1576,3 +1576,27 @@ html.tema-claro .dre-table tr.dre-subtotal td {
   color: #111111;
   border-color: rgba(0,0,0,0.12);
 }
+
+.modal-extras-secao {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+}
+.extra-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--texto);
+}
+.extra-item-remover {
+  background: transparent;
+  border: 1px solid rgba(255,59,59,.25);
+  border-radius: 6px;
+  color: var(--vermelho);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.extra-item-remover:hover { background: var(--vermelho-dim); }

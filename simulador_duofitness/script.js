@@ -3,6 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-aut
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
+let equipamentosExtras = [];
 
 // ── FIREBASE STORAGE ──
 const firebaseConfig = {
@@ -145,6 +146,11 @@ function recalcularParcela(combo) {
     cat.itens.forEach(item => {
       novoTotal += item.valorUnit * item.qtd;
     });
+  });
+
+  // Soma o valor dos equipamentos extras (de outros combos)
+  equipamentosExtras.forEach(ex => {
+    novoTotal += ex.valorUnit * ex.qtd;
   });
 
   // (novoTotal - entrada) ÷ parcelas = nova parcela
@@ -617,6 +623,7 @@ function abrirModal() {
       ).join('');
     grid.appendChild(card);
   });
+  renderizarExtras();
   document.getElementById('modalOverlay').classList.add('aberto');
 }
 
@@ -651,6 +658,78 @@ function atualizarPreviewValorEdicao() {
 }
 function fecharEdicaoItem() {
   document.getElementById('edicaoOverlay').classList.remove('aberto');
+}
+
+function abrirModalExtra() {
+  document.getElementById('extraCombo').value = 'UNO';
+  atualizarSelectItemExtra();
+  document.getElementById('extraQtd').value = 1;
+  document.getElementById('extraOverlay').classList.add('aberto');
+}
+
+function fecharModalExtra() {
+  document.getElementById('extraOverlay').classList.remove('aberto');
+}
+
+function atualizarSelectItemExtra() {
+  const combo = document.getElementById('extraCombo').value;
+  const sel = document.getElementById('extraItem');
+  sel.innerHTML = '';
+  CATALOGO[combo].categorias.forEach((cat, catIdx) => {
+    cat.itens.forEach((item, itemIdx) => {
+      const opt = document.createElement('option');
+      opt.value = `${catIdx}|${itemIdx}`;
+      opt.textContent = `${item.curto} (${cat.nome})`;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function confirmarExtra() {
+  const combo = document.getElementById('extraCombo').value;
+  const [catIdx, itemIdx] = document.getElementById('extraItem').value.split('|').map(Number);
+  const qtd = parseInt(document.getElementById('extraQtd').value);
+
+  if (!qtd || qtd <= 0) {
+    alert('Informe uma quantidade válida.');
+    return;
+  }
+
+  const item = CATALOGO[combo].categorias[catIdx].itens[itemIdx];
+  equipamentosExtras.push({
+    combo,
+    curto: item.curto,
+    valorUnit: item.valorUnit,
+    qtd,
+  });
+
+  fecharModalExtra();
+  recalcularParcela(document.getElementById('combo').value);
+  atualizar();
+  renderizarExtras();
+  abrirModal();
+}
+
+function removerExtra(index) {
+  equipamentosExtras.splice(index, 1);
+  recalcularParcela(document.getElementById('combo').value);
+  atualizar();
+  renderizarExtras();
+}
+
+function renderizarExtras() {
+  const div = document.getElementById('listaExtras');
+  if (!div) return;
+  if (equipamentosExtras.length === 0) {
+    div.innerHTML = '<div style="font-size:12px;color:var(--muted);">Nenhum equipamento extra adicionado.</div>';
+    return;
+  }
+  div.innerHTML = equipamentosExtras.map((ex, i) => `
+    <div class="extra-item-row">
+      <span>${ex.curto} <strong>×${ex.qtd}</strong> <span style="color:var(--muted);font-size:11px;">(${ex.combo})</span></span>
+      <button class="extra-item-remover" onclick="removerExtra(${i})">✕</button>
+    </div>
+  `).join('');
 }
 
 function confirmarEdicaoItem() {
@@ -726,7 +805,7 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     PROMO_VALOR: promoValorTxt,
   };
 
-  // Adiciona quantidades dos equipamentos do combo selecionado
+// Adiciona quantidades dos equipamentos do combo selecionado
   const catCombo = CATALOGO[combo];
   if (catCombo) {
     catCombo.categorias.forEach(cat => {
@@ -734,6 +813,15 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
         if (item.ph) valores[item.ph] = String(item.qtd);
       });
     });
+  }
+
+  // Equipamentos extras (de outros combos) — cada um em uma linha
+  if (equipamentosExtras.length > 0) {
+    valores.EQUIP_EXTRA = equipamentosExtras.map(ex => ex.curto).join('</a:p><a:p>');
+    valores.EQUIP_EXTRA_QUANT = equipamentosExtras.map(ex => String(ex.qtd)).join('</a:p><a:p>');
+  } else {
+    valores.EQUIP_EXTRA = '';
+    valores.EQUIP_EXTRA_QUANT = '';
   }
 
   const slides = Object.keys(zip.files).filter(
@@ -1186,6 +1274,7 @@ function limparFormulario() {
   if (promoOn) togglePromo();
 
   Object.keys(COMBOS).forEach(combo => resetarCatalogo(combo));
+  equipamentosExtras = [];
   itensEditados = false;
   document.getElementById('avisoEdicaoSimulador').style.display = 'none';
 
@@ -1322,6 +1411,11 @@ window.abrirEdicaoItem    = abrirEdicaoItem;
 window.fecharEdicaoItem   = fecharEdicaoItem;
 window.confirmarEdicaoItem = confirmarEdicaoItem;
 window.atualizarPreviewValorEdicao = atualizarPreviewValorEdicao;
+window.abrirModalExtra = abrirModalExtra;
+window.fecharModalExtra = fecharModalExtra;
+window.atualizarSelectItemExtra = atualizarSelectItemExtra;
+window.confirmarExtra = confirmarExtra;
+window.removerExtra = removerExtra;
 
 
 // ── HEARTBEAT ONLINE ──

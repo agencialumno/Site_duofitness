@@ -108,7 +108,7 @@
             <div class="tooltip-box">Escolha o pacote de equipamentos que será instalado no condomínio.</div>
           </div>
         </div>
-        <select id="combo" onchange="resetarCatalogo(this.value); atualizar()">
+        <select id="combo" onchange="resetarCatalogo(this.value); equipamentosExtras = []; renderizarExtras(); atualizar()">
   <option value="UNO">UNO</option>
   <option value="DUO" selected>DUO</option>
   <option value="TRIPLE">TRIPLE</option>
@@ -237,6 +237,49 @@
     <div class="modal-titulo-combo" id="modalNomeCombo">—</div>
     <div class="modal-subtitulo" id="modalTagCombo">—</div>
     <div class="modal-equip-grid" id="modalEquipGrid"></div>
+
+    <div class="modal-extras-secao">
+      <div class="modal-equip-titulo">Equipamentos extras adicionados</div>
+      <div id="listaExtras"></div>
+      <button class="btn-detalhes" onclick="abrirModalExtra()" style="margin-top:12px;">
+        + Adicionar equipamento de outro combo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADICIONAR EQUIPAMENTO EXTRA -->
+<div class="modal-overlay" id="extraOverlay">
+  <div class="modal-box" style="width: min(90vw, 420px);">
+    <button class="modal-fechar" onclick="fecharModalExtra()">✕</button>
+    <div class="modal-titulo-combo" style="font-size: 18px;">Adicionar equipamento</div>
+    <div class="modal-subtitulo" style="margin-bottom: 16px;">Escolha o combo, o equipamento e a quantidade</div>
+
+    <div class="campo">
+      <label for="extraCombo">Combo de origem</label>
+      <select id="extraCombo" onchange="atualizarSelectItemExtra()">
+        <option value="UNO">UNO</option>
+        <option value="DUO">DUO</option>
+        <option value="TRIPLE">TRIPLE</option>
+        <option value="PRIME">PRIME</option>
+        <option value="ELITE">ELITE</option>
+      </select>
+    </div>
+
+    <div class="campo" style="margin-top:10px;">
+      <label for="extraItem">Equipamento</label>
+      <select id="extraItem"></select>
+    </div>
+
+    <div class="campo" style="margin-top:10px;">
+      <label for="extraQtd">Quantidade</label>
+      <input type="number" id="extraQtd" min="1" step="1" value="1">
+    </div>
+
+    <div class="btn-row-secundario" style="margin-top: 16px;">
+      <button class="btn-limpar" onclick="fecharModalExtra()">Cancelar</button>
+      <button class="btn-detalhes" onclick="confirmarExtra()">Adicionar</button>
+    </div>
   </div>
 </div>
 
