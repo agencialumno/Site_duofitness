@@ -151,9 +151,9 @@ async function loginEmail(email, senha) {
 }
 
 async function cadastrarEmail(email, senha) {
-  let cred;
   try {
-    cred = await createUserWithEmailAndPassword(auth, email, senha);
+    await createUserWithEmailAndPassword(auth, email, senha);
+    mostrarSucesso('Email cadastrado, entre em contato com o admin pra acessar.');
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') {
       mostrarErro('Este e-mail já está cadastrado. Faça login.');
@@ -162,20 +162,6 @@ async function cadastrarEmail(email, senha) {
     } else {
       mostrarErro('Erro ao cadastrar. Tente novamente.');
     }
-    return;
-  }
-
-  try {
-    const autorizado = await emailAutorizado(cred.user.email);
-    if (!autorizado) {
-      await deleteUser(cred.user);
-      mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
-      return;
-    }
-    mostrarSucesso('Email cadastrado, entre em contato com o admin pra acessar.');
-  } catch(e) {
-    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
-    console.error(e);
   }
 }
 

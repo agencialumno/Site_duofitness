@@ -192,11 +192,10 @@
   // Processa o retorno do login via redirect (mobile)
   processarRedirect();
 
-  // Se já está logado, redireciona direto; senão esconde o loading
+  // Esconde o loading ao carregar a página
   onAuthStateChanged(auth, user => {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.style.display = 'none';
-    if (user) window.location.href = 'index.html';
   });
 
   let modoAtual = 'login';
