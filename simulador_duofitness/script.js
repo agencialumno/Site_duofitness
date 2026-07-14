@@ -65,31 +65,18 @@ function finalizarPopupSalvamento(sucesso) {
 
 async function salvarNoStorage(blob, nomeArquivo, tipo = 'PPTX') {
   try {
-    const { ref, uploadBytesResumable, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+    const { ref, uploadBytes, getDownloadURL } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
     const user = auth.currentUser;
     const caminho = `propostas/${tipo}/${nomeArquivo}`;
     const storageRef = ref(storage, caminho);
 
     mostrarPopupSalvamento();
+    atualizarPopupProgresso(50);
 
-    await new Promise((resolve, reject) => {
-      const uploadTask = uploadBytesResumable(storageRef, blob);
-      uploadTask.on('state_changed',
-        snapshot => {
-          const progresso = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          atualizarPopupProgresso(progresso);
-        },
-        error => {
-          finalizarPopupSalvamento(false);
-          reject(error);
-        },
-        async () => {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
-          finalizarPopupSalvamento(true);
-          resolve(url);
-        }
-      );
-    });
+    const snapshot = await uploadBytes(storageRef, blob);
+    const url = await getDownloadURL(snapshot.ref);
+
+    finalizarPopupSalvamento(true);
 
   } catch(e) {
     finalizarPopupSalvamento(false);

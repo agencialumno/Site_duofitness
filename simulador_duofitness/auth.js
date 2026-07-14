@@ -1,6 +1,6 @@
 // ── FIREBASE AUTH + FIRESTORE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
@@ -61,9 +61,36 @@ function mostrarErro(msg) {
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
 
+function isMobile() {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
 async function loginGoogle() {
   try {
+    if (isMobile()) {
+      // Em mobile, popups são bloqueados com frequência — usamos redirect.
+      await signInWithRedirect(auth, provider);
+      return; // a página recarrega e o resultado é tratado em processarRedirect()
+    }
     const result = await signInWithPopup(auth, provider);
+    const autorizado = await emailAutorizado(result.user.email);
+    if (!autorizado) {
+      await signOut(auth);
+      mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
+      return;
+    }
+    await registrarLogin(result.user, 'Google');
+    window.location.href = 'index.html';
+  } catch(e) {
+    mostrarErro('Erro ao fazer login com Google. Tente novamente.');
+    console.error(e);
+  }
+}
+
+async function processarRedirect() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return; // não veio de um redirect do Google
     const autorizado = await emailAutorizado(result.user.email);
     if (!autorizado) {
       await signOut(auth);
@@ -99,12 +126,13 @@ async function loginEmail(email, senha) {
 }
 async function cadastrarEmail(email, senha) {
   try {
-    const autorizado = await emailAutorizado(email);
+    const cred = await createUserWithEmailAndPassword(auth, email, senha);
+    const autorizado = await emailAutorizado(cred.user.email);
     if (!autorizado) {
+      await cred.user.delete();
       mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
       return;
     }
-    await createUserWithEmailAndPassword(auth, email, senha);
     window.location.href = 'index.html';
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') {
@@ -167,4 +195,4 @@ async function logout() {
   window.location.href = 'login.html';
 }
 
-export { loginGoogle, loginEmail, cadastrarEmail, verificarAuth, logout };
+export { loginGoogle, loginEmail, cadastrarEmail, verificarAuth, logout, processarRedirect };

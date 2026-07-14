@@ -58,6 +58,7 @@ await Promise.all([
     carregarPropostas(),
     carregarUsuarios(),
     carregarFranqueados(),
+    carregarAdmins(),
     carregarLogs(),
     carregarLogsLogin(),
   ]);
@@ -317,11 +318,48 @@ window.removerFranqueado = async function(id, email) {
   } catch(e) { alert('Erro ao remover franqueado.'); console.error(e); }
 };
 
+// ── ADMINISTRADORES ──
+async function carregarAdmins() {
+  const snap = await getDocs(collection(db, 'admins'));
+  const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  const div = document.getElementById('listaAdmins');
+  if (!div) return;
+  if (lista.length === 0) { div.innerHTML = '<div class="vazio">Nenhum administrador cadastrado.</div>'; return; }
+  div.innerHTML = lista.map(u => `
+    <div class="usuario-row">
+      <div class="usuario-info">
+        <div class="usuario-email">${u.email}</div>
+      </div>
+      <button class="btn-acao btn-excluir" onclick="removerAdmin('${u.id}','${u.email}')">✕ Remover</button>
+    </div>`).join('');
+}
+
+window.adicionarAdmin = async function() {
+  const email = document.getElementById('novoEmailAdmin').value.trim().toLowerCase();
+  if (!email) { alert('Informe um e-mail.'); return; }
+  try {
+    await addDoc(collection(db, 'admins'), { email });
+    document.getElementById('novoEmailAdmin').value = '';
+    await carregarAdmins();
+  } catch(e) { alert('Erro ao adicionar administrador.'); console.error(e); }
+};
+
+window.removerAdmin = async function(id, email) {
+  if (!confirm(`Remover administrador ${email}?`)) return;
+  try {
+    await deleteDoc(doc(db, 'admins', id));
+    await carregarAdmins();
+  } catch(e) { alert('Erro ao remover administrador.'); console.error(e); }
+};
+
 window.alternarAbaUsuarios = function(aba) {
   document.getElementById('abaVendedores').style.display = aba === 'vendedores' ? '' : 'none';
   document.getElementById('abaFranqueados').style.display = aba === 'franqueados' ? '' : 'none';
+  document.getElementById('abaAdmins').style.display = aba === 'admins' ? '' : 'none';
   document.getElementById('btnAbaVendedores').className = aba === 'vendedores' ? 'btn-primario' : 'btn-secundario';
   document.getElementById('btnAbaFranqueados').className = aba === 'franqueados' ? 'btn-primario' : 'btn-secundario';
+  document.getElementById('btnAbaAdmins').className = aba === 'admins' ? 'btn-primario' : 'btn-secundario';
 };
 
 // ── LOGS ──
