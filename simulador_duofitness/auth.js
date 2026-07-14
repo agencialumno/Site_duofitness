@@ -76,23 +76,27 @@ function isMobile() {
 }
 
 async function loginGoogle() {
+  console.log('loginGoogle() iniciada');
   try {
     const result = await signInWithPopup(auth, provider);
+    console.log('Popup retornou, email:', result.user.email);
     const autorizado = await emailAutorizado(result.user.email);
+    console.log('Autorizado?', autorizado);
     if (!autorizado) {
       await signOut(auth);
       mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
       return;
     }
     await registrarLogin(result.user, 'Google');
+    console.log('Login registrado, redirecionando...');
     window.location.href = 'index.html';
   } catch(e) {
+    console.error('Erro capturado em loginGoogle:', e.code, e.message);
     if (e.code === 'auth/popup-blocked') {
       mostrarErro('O navegador bloqueou a janela de login. Tente novamente ou use e-mail e senha.');
     } else {
       mostrarErro('Erro ao fazer login com Google. Tente novamente.');
     }
-    console.error(e);
   }
 }
 
