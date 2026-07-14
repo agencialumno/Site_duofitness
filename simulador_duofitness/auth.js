@@ -77,11 +77,6 @@ function isMobile() {
 
 async function loginGoogle() {
   try {
-    if (isMobile()) {
-      // Em mobile, popups são bloqueados com frequência — usamos redirect.
-      await signInWithRedirect(auth, provider);
-      return; // a página recarrega e o resultado é tratado em processarRedirect()
-    }
     const result = await signInWithPopup(auth, provider);
     const autorizado = await emailAutorizado(result.user.email);
     if (!autorizado) {
@@ -92,7 +87,11 @@ async function loginGoogle() {
     await registrarLogin(result.user, 'Google');
     window.location.href = 'index.html';
   } catch(e) {
-    mostrarErro('Erro ao fazer login com Google. Tente novamente.');
+    if (e.code === 'auth/popup-blocked') {
+      mostrarErro('O navegador bloqueou a janela de login. Tente novamente ou use e-mail e senha.');
+    } else {
+      mostrarErro('Erro ao fazer login com Google. Tente novamente.');
+    }
     console.error(e);
   }
 }
