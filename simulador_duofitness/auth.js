@@ -20,12 +20,17 @@ const provider = new GoogleAuthProvider();
 async function emailAutorizado(email) {
   try {
     const emailLower = email.toLowerCase();
+    console.log('Verificando autorização para:', emailLower);
 
     const [snapUsuarios, snapAdmins, snapFranqueados] = await Promise.all([
       getDocs(query(collection(db, 'usuarios_autorizados'), where('email', '==', emailLower))),
       getDocs(query(collection(db, 'admins'), where('email', '==', emailLower))),
       getDocs(query(collection(db, 'franqueados'), where('email', '==', emailLower))),
     ]);
+
+    console.log('Resultado usuarios_autorizados:', snapUsuarios.empty ? 'vazio' : 'encontrado', snapUsuarios.size);
+    console.log('Resultado admins:', snapAdmins.empty ? 'vazio' : 'encontrado', snapAdmins.size);
+    console.log('Resultado franqueados:', snapFranqueados.empty ? 'vazio' : 'encontrado', snapFranqueados.size);
 
     return !snapUsuarios.empty || !snapAdmins.empty || !snapFranqueados.empty;
   } catch(e) {
@@ -93,10 +98,17 @@ async function loginGoogle() {
 }
 
 async function processarRedirect() {
+  console.log('processarRedirect() foi chamada');
   try {
     const result = await getRedirectResult(auth);
-    if (!result) return; // não veio de um redirect do Google
+    console.log('Resultado do getRedirectResult:', result);
+    if (!result) {
+      console.log('Nenhum resultado de redirect — não veio do Google agora');
+      return;
+    }
+    console.log('Email retornado:', result.user.email);
     const autorizado = await emailAutorizado(result.user.email);
+    console.log('Email autorizado?', autorizado);
     if (!autorizado) {
       await signOut(auth);
       mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
@@ -105,8 +117,8 @@ async function processarRedirect() {
     await registrarLogin(result.user, 'Google');
     window.location.href = 'index.html';
   } catch(e) {
+    console.error('Erro em processarRedirect:', e);
     mostrarErro('Erro ao fazer login com Google. Tente novamente.');
-    console.error(e);
   }
 }
 
