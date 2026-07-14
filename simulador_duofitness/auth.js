@@ -80,6 +80,7 @@ async function loginGoogle() {
   try {
     const result = await signInWithPopup(auth, provider);
     console.log('Popup retornou, email:', result.user.email);
+    await new Promise(r => setTimeout(r, 500)); // pequena pausa para estabilizar rede no Safari mobile
     const autorizado = await emailAutorizado(result.user.email);
     console.log('Autorizado?', autorizado);
     if (!autorizado) {
