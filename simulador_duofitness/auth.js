@@ -17,32 +17,16 @@ const auth     = getAuth(app);
 const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-async function loginEmail(email, senha) {
-  let result;
-  try {
-    result = await signInWithEmailAndPassword(auth, email, senha);
-  } catch(e) {
-    if (e.code === 'auth/invalid-credential') {
-      mostrarErro('E-mail ou senha incorretos.');
-    } else {
-      mostrarErro('Erro ao fazer login. Tente novamente.');
-    }
-    return;
-  }
+async function emailAutorizado(email) {
+  const emailLower = email.toLowerCase();
 
-  try {
-    const autorizado = await emailAutorizado(result.user.email);
-    if (!autorizado) {
-      await signOut(auth);
-      mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
-      return;
-    }
-    await registrarLogin(result.user, 'E-mail');
-    window.location.href = 'index.html';
-  } catch(e) {
-    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
-    console.error(e);
-  }
+  const [snapUsuarios, snapAdmins, snapFranqueados] = await Promise.all([
+    getDocs(query(collection(db, 'usuarios_autorizados'), where('email', '==', emailLower))),
+    getDocs(query(collection(db, 'admins'), where('email', '==', emailLower))),
+    getDocs(query(collection(db, 'franqueados'), where('email', '==', emailLower))),
+  ]);
+
+  return !snapUsuarios.empty || !snapAdmins.empty || !snapFranqueados.empty;
 }
 
 async function registrarLogin(user, metodo) {
@@ -82,43 +66,23 @@ function isMobile() {
 }
 
 async function loginGoogle() {
-  console.log('loginGoogle() iniciada');
+  let result;
   try {
-    const result = await signInWithPopup(auth, provider);
-    console.log('Popup retornou, email:', result.user.email);
-    await new Promise(r => setTimeout(r, 500)); // pequena pausa para estabilizar rede no Safari mobile
-    const autorizado = await emailAutorizado(result.user.email);
-    console.log('Autorizado?', autorizado);
-    if (!autorizado) {
-      await signOut(auth);
-      mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
-      return;
-    }
-    await registrarLogin(result.user, 'Google');
-    console.log('Login registrado, redirecionando...');
-    window.location.href = 'index.html';
+    result = await signInWithPopup(auth, provider);
   } catch(e) {
-    console.error('Erro capturado em loginGoogle:', e.code, e.message);
     if (e.code === 'auth/popup-blocked') {
       mostrarErro('O navegador bloqueou a janela de login. Tente novamente ou use e-mail e senha.');
     } else {
       mostrarErro('Erro ao fazer login com Google. Tente novamente.');
     }
+    console.error(e);
+    return;
   }
-}
 
-async function processarRedirect() {
-  console.log('processarRedirect() foi chamada');
+  await new Promise(r => setTimeout(r, 500)); // pequena pausa para estabilizar rede no Safari mobile
+
   try {
-    const result = await getRedirectResult(auth);
-    console.log('Resultado do getRedirectResult:', result);
-    if (!result) {
-      console.log('Nenhum resultado de redirect — não veio do Google agora');
-      return;
-    }
-    console.log('Email retornado:', result.user.email);
     const autorizado = await emailAutorizado(result.user.email);
-    console.log('Email autorizado?', autorizado);
     if (!autorizado) {
       await signOut(auth);
       mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
@@ -127,14 +91,51 @@ async function processarRedirect() {
     await registrarLogin(result.user, 'Google');
     window.location.href = 'index.html';
   } catch(e) {
-    console.error('Erro em processarRedirect:', e);
+    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
+    console.error(e);
+  }
+}
+
+async function processarRedirect() {
+  let result;
+  try {
+    result = await getRedirectResult(auth);
+    if (!result) return;
+  } catch(e) {
     mostrarErro('Erro ao fazer login com Google. Tente novamente.');
+    console.error(e);
+    return;
+  }
+
+  try {
+    const autorizado = await emailAutorizado(result.user.email);
+    if (!autorizado) {
+      await signOut(auth);
+      mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
+      return;
+    }
+    await registrarLogin(result.user, 'Google');
+    window.location.href = 'index.html';
+  } catch(e) {
+    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
+    console.error(e);
   }
 }
 
 async function loginEmail(email, senha) {
+  let result;
   try {
-    const result = await signInWithEmailAndPassword(auth, email, senha);
+    result = await signInWithEmailAndPassword(auth, email, senha);
+  } catch(e) {
+    if (e.code === 'auth/invalid-credential') {
+      mostrarErro('E-mail ou senha incorretos.');
+    } else {
+      mostrarErro('Erro ao fazer login. Tente novamente.');
+    }
+    return;
+  }
+
+  try {
     const autorizado = await emailAutorizado(result.user.email);
     if (!autorizado) {
       await signOut(auth);
@@ -144,24 +145,15 @@ async function loginEmail(email, senha) {
     await registrarLogin(result.user, 'E-mail');
     window.location.href = 'index.html';
   } catch(e) {
-    if (e.code === 'auth/invalid-credential') {
-      mostrarErro('E-mail ou senha incorretos.');
-    } else {
-      mostrarErro('Erro ao fazer login. Tente novamente.');
-    }
+    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
+    console.error(e);
   }
 }
+
 async function cadastrarEmail(email, senha) {
+  let cred;
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, senha);
-    const autorizado = await emailAutorizado(cred.user.email);
-    if (!autorizado) {
-      await deleteUser(cred.user);
-      mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
-      return;
-    }
-    mostrarSucesso('Email cadastrado, entre em contato com o admin pra acessar.');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+    cred = await createUserWithEmailAndPassword(auth, email, senha);
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') {
       mostrarErro('Este e-mail já está cadastrado. Faça login.');
@@ -170,6 +162,20 @@ async function cadastrarEmail(email, senha) {
     } else {
       mostrarErro('Erro ao cadastrar. Tente novamente.');
     }
+    return;
+  }
+
+  try {
+    const autorizado = await emailAutorizado(cred.user.email);
+    if (!autorizado) {
+      await deleteUser(cred.user);
+      mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
+      return;
+    }
+    mostrarSucesso('Email cadastrado, entre em contato com o admin pra acessar.');
+  } catch(e) {
+    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
+    console.error(e);
   }
 }
 
@@ -218,6 +224,7 @@ function verificarAuth() {
     if (typeof window.aplicarPermissoes === 'function') window.aplicarPermissoes(role);
   });
 }
+
 async function logout() {
   await signOut(auth);
   window.location.href = 'login.html';
