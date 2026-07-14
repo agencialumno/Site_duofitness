@@ -107,6 +107,13 @@
       padding: 10px 14px;
       text-align: center;
     }
+
+    .auth-erro.sucesso {
+  color: var(--verde);
+  background: var(--verde-dim);
+  border-color: rgba(0,200,83,.3);
+}
+
     .btn-auth {
       width: 100%;
       padding: 14px;
@@ -201,7 +208,9 @@
     document.getElementById('tabLogin').classList.toggle('ativo', modo === 'login');
     document.getElementById('tabCadastro').classList.toggle('ativo', modo === 'cadastro');
     document.getElementById('btnAuth').textContent = modo === 'login' ? 'Entrar' : 'Cadastrar';
-    document.getElementById('authErro').style.display = 'none';
+    const erroEl = document.getElementById('authErro');
+    erroEl.style.display = 'none';
+    erroEl.classList.remove('sucesso');
   };
 
   window.submitAuth = function() {

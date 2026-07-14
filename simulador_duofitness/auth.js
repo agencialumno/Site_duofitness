@@ -1,6 +1,6 @@
 // ── FIREBASE AUTH + FIRESTORE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
@@ -58,7 +58,20 @@ async function registrarLogin(user, metodo) {
 
 function mostrarErro(msg) {
   const el = document.getElementById('authErro');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.classList.remove('sucesso');
+  }
+}
+
+function mostrarSucesso(msg) {
+  const el = document.getElementById('authErro');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.classList.add('sucesso');
+  }
 }
 
 function isMobile() {
@@ -129,11 +142,12 @@ async function cadastrarEmail(email, senha) {
     const cred = await createUserWithEmailAndPassword(auth, email, senha);
     const autorizado = await emailAutorizado(cred.user.email);
     if (!autorizado) {
-      await cred.user.delete();
+      await deleteUser(cred.user);
       mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
       return;
     }
-    window.location.href = 'index.html';
+    mostrarSucesso('Conta criada com sucesso! Redirecionando...');
+    setTimeout(() => { window.location.href = 'index.html'; }, 1200);
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') {
       mostrarErro('Este e-mail já está cadastrado. Faça login.');
