@@ -17,25 +17,31 @@ const auth     = getAuth(app);
 const db       = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-async function emailAutorizado(email) {
+async function loginEmail(email, senha) {
+  let result;
   try {
-    const emailLower = email.toLowerCase();
-    console.log('Verificando autorização para:', emailLower);
-
-    const [snapUsuarios, snapAdmins, snapFranqueados] = await Promise.all([
-      getDocs(query(collection(db, 'usuarios_autorizados'), where('email', '==', emailLower))),
-      getDocs(query(collection(db, 'admins'), where('email', '==', emailLower))),
-      getDocs(query(collection(db, 'franqueados'), where('email', '==', emailLower))),
-    ]);
-
-    console.log('Resultado usuarios_autorizados:', snapUsuarios.empty ? 'vazio' : 'encontrado', snapUsuarios.size);
-    console.log('Resultado admins:', snapAdmins.empty ? 'vazio' : 'encontrado', snapAdmins.size);
-    console.log('Resultado franqueados:', snapFranqueados.empty ? 'vazio' : 'encontrado', snapFranqueados.size);
-
-    return !snapUsuarios.empty || !snapAdmins.empty || !snapFranqueados.empty;
+    result = await signInWithEmailAndPassword(auth, email, senha);
   } catch(e) {
-    console.error('Erro ao verificar autorização:', e);
-    return false;
+    if (e.code === 'auth/invalid-credential') {
+      mostrarErro('E-mail ou senha incorretos.');
+    } else {
+      mostrarErro('Erro ao fazer login. Tente novamente.');
+    }
+    return;
+  }
+
+  try {
+    const autorizado = await emailAutorizado(result.user.email);
+    if (!autorizado) {
+      await signOut(auth);
+      mostrarErro('Acesso não autorizado. Entre em contato com o administrador.');
+      return;
+    }
+    await registrarLogin(result.user, 'E-mail');
+    window.location.href = 'index.html';
+  } catch(e) {
+    mostrarErro('Não foi possível verificar seu acesso. Verifique sua conexão com a internet e tente novamente.');
+    console.error(e);
   }
 }
 
@@ -154,7 +160,7 @@ async function cadastrarEmail(email, senha) {
       mostrarErro('Este e-mail não está autorizado. Entre em contato com o administrador.');
       return;
     }
-    mostrarSucesso('Conta criada com sucesso! Redirecionando...');
+    mostrarSucesso('Email cadastrado, entre em contato com o admin pra acessar.');
     setTimeout(() => { window.location.href = 'index.html'; }, 1200);
   } catch(e) {
     if (e.code === 'auth/email-already-in-use') {
