@@ -743,6 +743,147 @@ function fmtBRL(v) {
   return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+const SLIDE_MAP = {
+  UNO: {
+    BIKE_KIKOS: 13, ESTACAO_MULT: 14, HALTER: 16, ANILHA: 16, BARRA_W: 17,
+    SUP_BARRA: 18, SUP_HALTER: 18, TRI_SERG: 19, CORDA_SERG: 19, PUX_ROMA: 19,
+    PUX_RETO: 20, PUX_TORNO: 20, STEP_LIGHT: 21, COLCHONETE: 21,
+  },
+  DUO: {
+    ESTEIRA: 12, BIKE_KIKOS: 13, BIKE_SPI: 14, CROSS_SMITH: 15, AD_ABD: 16, EX_FLX: 17,
+    BANCO_MULT: 18, BANCO_SUP: 19, HALTER: 20, ANILHA: 20, BARRA_W: 21,
+    SUP_HALTER: 22, SUP_BARRA: 22, TRI_SERG: 23, CORDA_SERG: 23, PUX_ROMA: 23,
+    PUX_RETO: 24, PUX_TORNO: 24, COLCHONETE: 25, STEP_LIGHT: 25,
+  },
+  TRIPLE: {
+    ESTEIRA: 12, BIKE_KIKOS: 13, BIKE_SPI: 14, ELIPTICO: 15, CROSS_SMITH: 16, LEG_PRESS: 17,
+    PEIT_DORS: 18, AD_ABD: 19, EX_FLX: 20, PULLEY: 21, BANCO_MULT: 22, BANCO_SUP: 23,
+    HALTER: 24, ANILHA: 24, BARRA_W: 25, SUP_HALTER: 26, SUP_BARRA: 26,
+    PUX_ROMA: 27, CORDA_SERG: 27, TRI_SERG: 27, PUX_RETO: 28, PUX_TORNO: 28,
+    COLCHONETE: 29, STEP_LIGHT: 29,
+  },
+  PRIME: {
+    ESTEIRA: 12, BIKE_KIKOS: 13, BIKE_SPI: 14, ELIPTICO: 15, CROSS_ANG: 16, CROSS_SMITH: 17,
+    G_MAX: 18, LEG_PRESS: 19, PEIT_DORS: 20, AD_ABD: 21, EX_FLX: 22, PULLEY: 23,
+    BANCO_MULT: 24, BANCO_SUP: 25, HALTER: 26, ANILHA: 26, BARRA_W: 27,
+    SUP_BARRA: 28, SUP_HALTER: 28, TRI_SERG: 29, CORDA_SERG: 29, PUX_ROMA: 29,
+    PUX_RETO: 30, PUX_TORNO: 30, COLCHONETE: 31, STEP_LIGHT: 31,
+  },
+  ELITE: {
+    ESTEIRA: 12, BIKE_ERGO: 13, BIKE_KIKOS: 14, BIKE_SPI: 15, ELIPTICO: 16, ESCADA: 17,
+    CROSS_ANG: 18, CROSS_SMITH: 19, ELEVACAO: 20, G_MAX: 21, LEG_PRESS: 22, PEIT_DORS: 23,
+    DESENV: 24, PUXADA_ALTA: 25, AD_ABD: 26, EX_FLX: 27, PULLEY: 28, BANCO_MULT: 29,
+    BANCO_SUP: 30, HALTER: 31, ANILHA: 31, D_14: 32, D_18: 32, D_22: 32,
+    D_26: 33, D_30: 33, BARRA_W: 34, SUP_HALTER: 35, SUP_BARRA: 35, RACK_DUMBELL: 36,
+    PUX_ROMA: 37, CORDA_SERG: 37, TRI_SERG: 37, PUX_RETO: 38, PUX_TORNO: 38,
+    COLCHONETE: 39, STEP_LIGHT: 39,
+  },
+};
+
+function proximoNumeroSlide(zip) {
+  const nums = Object.keys(zip.files)
+    .map(f => f.match(/^ppt\/slides\/slide(\d+)\.xml$/))
+    .filter(Boolean)
+    .map(m => parseInt(m[1]));
+  return Math.max(...nums) + 1;
+}
+
+function proximoRid(relsXml) {
+  const nums = [...relsXml.matchAll(/Id="rId(\d+)"/g)].map(m => parseInt(m[1]));
+  return Math.max(0, ...nums) + 1;
+}
+
+function proximoSldId(presentationXml) {
+  const nums = [...presentationXml.matchAll(/<p:sldId id="(\d+)"/g)].map(m => parseInt(m[1]));
+  return Math.max(0, ...nums) + 1;
+}
+
+// Remove um slide inteiro do combo (usado quando qtd = 0 para todos os itens daquele slide)
+async function removerSlideDoZip(zip, slideNum) {
+  const slidePath = `ppt/slides/slide${slideNum}.xml`;
+  const relsPath = `ppt/slides/_rels/slide${slideNum}.xml.rels`;
+  if (!zip.file(slidePath)) return;
+
+  let presRels = await zip.file('ppt/_rels/presentation.xml.rels').async('string');
+  const relMatch = presRels.match(new RegExp(`<Relationship Id="(rId\\d+)"[^>]*Target="slides/slide${slideNum}\\.xml"/>`));
+  if (!relMatch) return;
+  const rId = relMatch[1];
+
+  presRels = presRels.replace(relMatch[0], '');
+  zip.file('ppt/_rels/presentation.xml.rels', presRels);
+
+  let presXml = await zip.file('ppt/presentation.xml').async('string');
+  presXml = presXml.replace(new RegExp(`<p:sldId id="\\d+" r:id="${rId}"/>`), '');
+  zip.file('ppt/presentation.xml', presXml);
+
+  let contentTypes = await zip.file('[Content_Types].xml').async('string');
+  contentTypes = contentTypes.replace(new RegExp(`<Override PartName="/ppt/slides/slide${slideNum}\\.xml"[^>]*/>`), '');
+  zip.file('[Content_Types].xml', contentTypes);
+
+  zip.remove(slidePath);
+  zip.remove(relsPath);
+}
+
+// Copia um slide do template ELITE para o zip de destino, colocando as quantidades corretas
+async function copiarSlideParaZip(zipOrigem, slideNumOrigem, zipDestino, quantidadesOverride, posicaoAposRid) {
+  const slidePathOrigem = `ppt/slides/slide${slideNumOrigem}.xml`;
+  let slideXml = await zipOrigem.file(slidePathOrigem).async('string');
+  let slideRelsXml = await zipOrigem.file(`ppt/slides/_rels/slide${slideNumOrigem}.xml.rels`).async('string');
+
+  Object.entries(quantidadesOverride).forEach(([chave, valor]) => {
+    slideXml = slideXml.replaceAll(`[${chave}]`, String(valor));
+  });
+
+  const imgMatch = slideRelsXml.match(/Target="\.\.\/media\/([^"]+)"/);
+  if (imgMatch) {
+    const nomeImagemOrigem = imgMatch[1];
+    const imgData = await zipOrigem.file(`ppt/media/${nomeImagemOrigem}`).async('uint8array');
+    let novoNomeImagem = nomeImagemOrigem;
+    let i = 0;
+    while (zipDestino.file(`ppt/media/${novoNomeImagem}`)) {
+      i++;
+      novoNomeImagem = `extra_${i}_${nomeImagemOrigem}`;
+    }
+    zipDestino.file(`ppt/media/${novoNomeImagem}`, imgData);
+    slideRelsXml = slideRelsXml.replace(`../media/${nomeImagemOrigem}`, `../media/${novoNomeImagem}`);
+  }
+
+  const novoSlideNum = proximoNumeroSlide(zipDestino);
+  zipDestino.file(`ppt/slides/slide${novoSlideNum}.xml`, slideXml);
+  zipDestino.file(`ppt/slides/_rels/slide${novoSlideNum}.xml.rels`, slideRelsXml);
+
+  let presRels = await zipDestino.file('ppt/_rels/presentation.xml.rels').async('string');
+  const novoRid = 'rId' + proximoRid(presRels);
+  presRels = presRels.replace(
+    '</Relationships>',
+    `<Relationship Id="${novoRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${novoSlideNum}.xml"/></Relationships>`
+  );
+  zipDestino.file('ppt/_rels/presentation.xml.rels', presRels);
+
+  let contentTypes = await zipDestino.file('[Content_Types].xml').async('string');
+  contentTypes = contentTypes.replace(
+    '</Types>',
+    `<Override PartName="/ppt/slides/slide${novoSlideNum}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/></Types>`
+  );
+  zipDestino.file('[Content_Types].xml', contentTypes);
+
+  let presXml = await zipDestino.file('ppt/presentation.xml').async('string');
+  const novoSldId = proximoSldId(presXml);
+  const novaEntrada = `<p:sldId id="${novoSldId}" r:id="${novoRid}"/>`;
+
+  if (posicaoAposRid) {
+    // Insere logo depois do sldId que referencia posicaoAposRid
+    const regexAlvo = new RegExp(`(<p:sldId id="\\d+" r:id="${posicaoAposRid}"/>)`);
+    presXml = presXml.replace(regexAlvo, `$1${novaEntrada}`);
+  } else {
+    const ultimaOcorrencia = presXml.lastIndexOf('<p:sldId ');
+    presXml = presXml.slice(0, ultimaOcorrencia) + novaEntrada + presXml.slice(ultimaOcorrencia);
+  }
+
+  zipDestino.file('ppt/presentation.xml', presXml);
+  return novoRid;
+}
+
 // ── GERA O ZIP COM O PPTX PREENCHIDO (reutilizado por PPTX e PDF) ──
 async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPromo, valorPromo) {
   const arquivo = combo.toLowerCase();
@@ -794,12 +935,8 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     });
   }
 
-// Equipamentos extras (de outros combos) — nome e quantidade juntos, separados por vírgula
-  if (equipamentosExtras.length > 0) {
-    valores.EQUIP_EXTRA = equipamentosExtras.map(ex => `${ex.curto} (${ex.qtd})`).join(', ');
-  } else {
-    valores.EQUIP_EXTRA = '';
-  }
+// Placeholder de texto único fica sempre vazio agora — os extras viram slides reais
+  valores.EQUIP_EXTRA = '';
 
   const slides = Object.keys(zip.files).filter(
     f => f.startsWith('ppt/slides/slide') && f.endsWith('.xml')
@@ -811,6 +948,76 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       xml = xml.replaceAll(`[${chave}]`, valor);
     });
     zip.file(slidePath, xml);
+  }
+
+  // ── Remover slides de equipamentos com quantidade zero ──
+  const mapaCombo = SLIDE_MAP[combo];
+  if (mapaCombo) {
+    const slidesPorNum = {};
+    catCombo.categorias.forEach(cat => {
+      cat.itens.forEach(item => {
+        if (item.ph && mapaCombo[item.ph] != null) {
+          const num = mapaCombo[item.ph];
+          if (!slidesPorNum[num]) slidesPorNum[num] = [];
+          slidesPorNum[num].push(item.qtd);
+        }
+      });
+    });
+    for (const [slideNum, qtds] of Object.entries(slidesPorNum)) {
+      const todosZerados = qtds.every(q => q === 0);
+      if (todosZerados) {
+        await removerSlideDoZip(zip, parseInt(slideNum));
+      }
+    }
+  }
+
+  // ── Adicionar slides dos equipamentos extras (sempre copiados do template ELITE) ──
+  if (equipamentosExtras.length > 0) {
+    if (!window._eliteZipCache) {
+      const respElite = await fetch('templates/elite.pptx');
+      const bufElite = await respElite.arrayBuffer();
+      window._eliteZipCache = await JSZip.loadAsync(bufElite);
+    }
+    const eliteZip = window._eliteZipCache;
+    const mapaElite = SLIDE_MAP.ELITE;
+
+    // Descobre o número do último slide de equipamento ainda existente no combo (após remoções)
+    const numerosDeEquipamento = Object.values(mapaCombo || {});
+    const maiorSlideEquipCombo = numerosDeEquipamento.length > 0 ? Math.max(...numerosDeEquipamento) : null;
+
+    let ridReferencia = null;
+    if (maiorSlideEquipCombo) {
+      const presRelsAtual = await zip.file('ppt/_rels/presentation.xml.rels').async('string');
+      // Procura pelo maior slide de equipamento que ainda existe (pode ter sido removido se zerado)
+      for (let n = maiorSlideEquipCombo; n >= 1; n--) {
+        const m = presRelsAtual.match(new RegExp(`<Relationship Id="(rId\\d+)"[^>]*Target="slides/slide${n}\\.xml"/>`));
+        if (m) { ridReferencia = m[1]; break; }
+      }
+    }
+
+    // Agrupa os extras por slide de origem (alguns itens dividem o mesmo slide no ELITE)
+    const extrasPorSlide = {};
+    equipamentosExtras.forEach(ex => {
+      const ph = Object.keys(mapaElite).find(chave => {
+        return CATALOGO.ELITE.categorias.some(cat =>
+          cat.itens.some(it => it.curto === ex.curto && it.ph === chave)
+        );
+      });
+      if (!ph) return;
+      const slideNum = mapaElite[ph];
+      if (!extrasPorSlide[slideNum]) extrasPorSlide[slideNum] = {};
+      extrasPorSlide[slideNum][ph] = ex.qtd;
+    });
+
+    for (const [slideNum, phsComQtd] of Object.entries(extrasPorSlide)) {
+      const todosPhsDoSlide = Object.keys(mapaElite).filter(ph => mapaElite[ph] === parseInt(slideNum));
+      const overrideCompleto = {};
+      todosPhsDoSlide.forEach(ph => {
+        overrideCompleto[ph] = phsComQtd[ph] != null ? phsComQtd[ph] : 0;
+      });
+      const novoRidInserido = await copiarSlideParaZip(eliteZip, parseInt(slideNum), zip, overrideCompleto, ridReferencia);
+      ridReferencia = novoRidInserido; // próximo extra entra logo depois deste
+    }
   }
 
   return { zip, nome: nomeRaw };
