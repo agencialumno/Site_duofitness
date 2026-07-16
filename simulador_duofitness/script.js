@@ -925,6 +925,9 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     PROMO_VALOR: promoValorTxt,
   };
 
+  // Marca se deve remover o bloco de período promocional do slide de resumo
+  const removerBlocoPromo = !(promoAtiva && mesesPromoNum > 0);
+
 // Adiciona quantidades dos equipamentos do combo selecionado
   const catCombo = CATALOGO[combo];
   if (catCombo) {
@@ -947,6 +950,21 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     Object.entries(valores).forEach(([chave, valor]) => {
       xml = xml.replaceAll(`[${chave}]`, valor);
     });
+
+   // Remove o parágrafo inteiro do bloco "Período Promocional" quando não estiver ativo
+    if (removerBlocoPromo && xml.includes('Promocional') && xml.includes('- ' + promoMesTxt)) {
+      const idxPromo = xml.indexOf('Promocional');
+      const inicioParagrafo = xml.lastIndexOf('<a:p>', idxPromo);
+      const fimBusca = xml.indexOf(promoValorTxt, idxPromo);
+      if (inicioParagrafo !== -1 && fimBusca !== -1) {
+        const idxFechamento = xml.indexOf('</a:p>', fimBusca);
+        if (idxFechamento !== -1) {
+          const fimParagrafo = idxFechamento + '</a:p>'.length;
+          xml = xml.slice(0, inicioParagrafo) + xml.slice(fimParagrafo);
+        }
+      }
+    }
+
     zip.file(slidePath, xml);
   }
 
