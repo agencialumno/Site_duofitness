@@ -1618,6 +1618,7 @@ window.fecharModalExtra = fecharModalExtra;
 window.atualizarSelectItemExtra = atualizarSelectItemExtra;
 window.confirmarExtra = confirmarExtra;
 window.removerExtra = removerExtra;
+window.renderizarExtras = renderizarExtras;
 
 
 // ── HEARTBEAT ONLINE ──
