@@ -951,7 +951,7 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       xml = xml.replaceAll(`[${chave}]`, valor);
     });
 
-   // Remove o parágrafo inteiro do bloco "Período Promocional" quando não estiver ativo
+   // Esvazia o texto do bloco "Período Promocional" quando não estiver ativo (sem remover a estrutura do parágrafo)
     if (removerBlocoPromo && xml.includes('Promocional') && xml.includes('- ' + promoMesTxt)) {
       const idxPromo = xml.indexOf('Promocional');
       const inicioParagrafo = xml.lastIndexOf('<a:p>', idxPromo);
@@ -960,7 +960,10 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
         const idxFechamento = xml.indexOf('</a:p>', fimBusca);
         if (idxFechamento !== -1) {
           const fimParagrafo = idxFechamento + '</a:p>'.length;
-          xml = xml.slice(0, inicioParagrafo) + xml.slice(fimParagrafo);
+          const paragrafoOriginal = xml.slice(inicioParagrafo, fimParagrafo);
+          // Remove todo o texto visível (<a:t>...</a:t>) mas mantém a estrutura do parágrafo
+          const paragrafoVazio = paragrafoOriginal.replace(/<a:t>[^<]*<\/a:t>/g, '<a:t></a:t>');
+          xml = xml.slice(0, inicioParagrafo) + paragrafoVazio + xml.slice(fimParagrafo);
         }
       }
     }
@@ -1218,7 +1221,8 @@ async function gerarProposta() {
       type: 'blob',
       mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
+      compressionOptions: { level: 6 },
+      platform: 'DOS'
     });
 
     const url = URL.createObjectURL(blob);
@@ -1326,8 +1330,7 @@ async function gerarPDF() {
     const pptxBlob = await zip.generateAsync({
       type: 'blob',
       mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
+      compression: 'STORE'
     });
 
     // 2. Criar job no CloudConvert
