@@ -1040,55 +1040,6 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     }
   }
 
-  // ── Adicionar slides dos equipamentos extras (sempre copiados do template ELITE) ──
-  if (equipamentosExtras.length > 0) {
-    if (!window._eliteZipCache) {
-      const respElite = await fetch('templates/elite.pptx');
-      const bufElite = await respElite.arrayBuffer();
-      window._eliteZipCache = await JSZip.loadAsync(bufElite);
-    }
-    const eliteZip = window._eliteZipCache;
-    const mapaElite = SLIDE_MAP.ELITE;
-
-    // Descobre o número do último slide de equipamento ainda existente no combo (após remoções)
-    const numerosDeEquipamento = Object.values(mapaCombo || {});
-    const maiorSlideEquipCombo = numerosDeEquipamento.length > 0 ? Math.max(...numerosDeEquipamento) : null;
-
-    let ridReferencia = null;
-    if (maiorSlideEquipCombo) {
-      const presRelsAtual = await zip.file('ppt/_rels/presentation.xml.rels').async('string');
-      // Procura pelo maior slide de equipamento que ainda existe (pode ter sido removido se zerado)
-      for (let n = maiorSlideEquipCombo; n >= 1; n--) {
-        const m = presRelsAtual.match(new RegExp(`<Relationship Id="(rId\\d+)"[^>]*Target="slides/slide${n}\\.xml"/>`));
-        if (m) { ridReferencia = m[1]; break; }
-      }
-    }
-
-    // Agrupa os extras por slide de origem (alguns itens dividem o mesmo slide no ELITE)
-    const extrasPorSlide = {};
-    equipamentosExtras.forEach(ex => {
-      const ph = Object.keys(mapaElite).find(chave => {
-        return CATALOGO.ELITE.categorias.some(cat =>
-          cat.itens.some(it => it.curto === ex.curto && it.ph === chave)
-        );
-      });
-      if (!ph) return;
-      const slideNum = mapaElite[ph];
-      if (!extrasPorSlide[slideNum]) extrasPorSlide[slideNum] = {};
-      extrasPorSlide[slideNum][ph] = ex.qtd;
-    });
-
-    for (const [slideNum, phsComQtd] of Object.entries(extrasPorSlide)) {
-      const todosPhsDoSlide = Object.keys(mapaElite).filter(ph => mapaElite[ph] === parseInt(slideNum));
-      const overrideCompleto = {};
-      todosPhsDoSlide.forEach(ph => {
-        overrideCompleto[ph] = phsComQtd[ph] != null ? phsComQtd[ph] : 0;
-      });
-      const novoRidInserido = await copiarSlideParaZip(eliteZip, parseInt(slideNum), zip, overrideCompleto, ridReferencia);
-      ridReferencia = novoRidInserido; // próximo extra entra logo depois deste
-    }
-  }
-
   return { zip, nome: nomeRaw };
 }
 
