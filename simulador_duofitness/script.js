@@ -799,11 +799,11 @@ const SLIDE_MAP = {
 };
 
 const EXTRAS_SLIDE_MAP = {
-  UNO: 23,
-  DUO: 27,
-  TRIPLE: 31,
-  PRIME: 33,
-  ELITE: 41,
+  UNO: 22,
+  DUO: 26,
+  TRIPLE: 30,
+  PRIME: 32,
+  ELITE: 40,
 };
 
 function proximoNumeroSlide(zip) {
