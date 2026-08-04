@@ -977,19 +977,24 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       xml = xml.replaceAll(`[${chave}]`, valor);
     });
 
-    // Placeholder [EXTRAS]: substitui o <a:r> por múltiplas linhas (título + um item por linha)
-    if (xml.includes('[EXTRAS]') && equipamentosExtras.length > 0) {
+    // Placeholder [EXTRAS]: substitui o <a:r> por múltiplas linhas (título + um item por linha),
+    // ou esvazia o texto quando não há equipamentos extras (evita mostrar o placeholder literal, caso o slide não seja removido)
+    if (xml.includes('[EXTRAS]')) {
       const runMatch = xml.match(/<a:r>((?:(?!<\/a:r>).)*)\[EXTRAS\]((?:(?!<\/a:r>).)*)<\/a:r>/s);
       if (runMatch) {
         const runCompleto = runMatch[0];
         const rPrMatch = runCompleto.match(/<a:rPr[^>]*>.*?<\/a:rPr>|<a:rPr[^>]*\/>/s);
         const rPr = rPrMatch ? rPrMatch[0] : '';
 
-        const linhas = ['Equipamentos Extras:'];
-        equipamentosExtras.forEach(ex => linhas.push(`${ex.curto} - ${ex.qtd}`));
-
-        const novoConteudo = linhas.map(txt => `<a:r>${rPr}<a:t>${txt}</a:t></a:r>`).join('<a:br/>');
-        xml = xml.replace(runCompleto, novoConteudo);
+        if (equipamentosExtras.length > 0) {
+          const linhas = ['Equipamentos Extras:'];
+          equipamentosExtras.forEach(ex => linhas.push(`${ex.curto} - ${ex.qtd}`));
+          const novoConteudo = linhas.map(txt => `<a:r>${rPr}<a:t>${txt}</a:t></a:r>`).join('<a:br/>');
+          xml = xml.replace(runCompleto, novoConteudo);
+        } else {
+          const runVazio = `<a:r>${rPr}<a:t></a:t></a:r>`;
+          xml = xml.replace(runCompleto, runVazio);
+        }
       }
     }
 
