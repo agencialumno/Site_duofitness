@@ -665,7 +665,8 @@ function atualizarSelectItemExtra() {
 }
 
 function confirmarExtra() {
-  const combo = document.getElementById('extraCombo').value;
+  const comboAtivo  = document.getElementById('combo').value;
+  const comboOrigem = document.getElementById('extraCombo').value;
   const [catIdx, itemIdx] = document.getElementById('extraItem').value.split('|').map(Number);
   const qtd = parseInt(document.getElementById('extraQtd').value);
 
@@ -674,16 +675,33 @@ function confirmarExtra() {
     return;
   }
 
-  const item = CATALOGO[combo].categorias[catIdx].itens[itemIdx];
-  equipamentosExtras.push({
-    combo,
-    curto: item.curto,
-    valorUnit: item.valorUnit,
-    qtd,
+  const item = CATALOGO[comboOrigem].categorias[catIdx].itens[itemIdx];
+
+  // Verifica se esse equipamento (mesmo placeholder) já existe na lista do combo ativo
+  let itemExistente = null;
+  CATALOGO[comboAtivo].categorias.forEach(cat => {
+    cat.itens.forEach(it => {
+      if (it.ph === item.ph) itemExistente = it;
+    });
   });
 
+  if (itemExistente) {
+    // Já existe no combo ativo: apenas soma a quantidade no item original,
+    // sem criar entrada em equipamentosExtras (não vira slide separado)
+    itemExistente.qtd += qtd;
+  } else {
+    // Não existe no combo ativo: segue o fluxo normal de extra (slide copiado do ELITE)
+    equipamentosExtras.push({
+      combo: comboOrigem,
+      curto: item.curto,
+      valorUnit: item.valorUnit,
+      qtd,
+    });
+  }
+
   fecharModalExtra();
-  recalcularParcela(document.getElementById('combo').value);
+  recalcularParcela(comboAtivo);
+  verificarItensEditados(comboAtivo);
   atualizar();
   renderizarExtras();
   abrirModal();
@@ -778,6 +796,14 @@ const SLIDE_MAP = {
     PUX_ROMA: 37, CORDA_SERG: 37, TRI_SERG: 37, PUX_RETO: 38, PUX_TORNO: 38,
     COLCHONETE: 39, STEP_LIGHT: 39,
   },
+};
+
+const EXTRAS_SLIDE_MAP = {
+  UNO: 23,
+  DUO: 27,
+  TRIPLE: 31,
+  PRIME: 33,
+  ELITE: 41,
 };
 
 function proximoNumeroSlide(zip) {
@@ -951,6 +977,22 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       xml = xml.replaceAll(`[${chave}]`, valor);
     });
 
+    // Placeholder [EXTRAS]: substitui o <a:r> por múltiplas linhas (título + um item por linha)
+    if (xml.includes('[EXTRAS]') && equipamentosExtras.length > 0) {
+      const runMatch = xml.match(/<a:r>((?:(?!<\/a:r>).)*)\[EXTRAS\]((?:(?!<\/a:r>).)*)<\/a:r>/s);
+      if (runMatch) {
+        const runCompleto = runMatch[0];
+        const rPrMatch = runCompleto.match(/<a:rPr[^>]*>.*?<\/a:rPr>|<a:rPr[^>]*\/>/s);
+        const rPr = rPrMatch ? rPrMatch[0] : '';
+
+        const linhas = ['Equipamentos Extras:'];
+        equipamentosExtras.forEach(ex => linhas.push(`${ex.curto} - ${ex.qtd}`));
+
+        const novoConteudo = linhas.map(txt => `<a:r>${rPr}<a:t>${txt}</a:t></a:r>`).join('<a:br/>');
+        xml = xml.replace(runCompleto, novoConteudo);
+      }
+    }
+
    // Esvazia o texto do bloco "Período Promocional" quando não estiver ativo (sem remover a estrutura do parágrafo)
     if (removerBlocoPromo && xml.includes('Promocional') && xml.includes('- ' + promoMesTxt)) {
       const idxPromo = xml.indexOf('Promocional');
@@ -969,6 +1011,12 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     }
 
     zip.file(slidePath, xml);
+  }
+
+  // ── Remover o slide de equipamentos extras se não houver nenhum extra adicionado ──
+  const slideExtrasNum = EXTRAS_SLIDE_MAP[combo];
+  if (slideExtrasNum && equipamentosExtras.length === 0) {
+    await removerSlideDoZip(zip, slideExtrasNum);
   }
 
   // ── Remover slides de equipamentos com quantidade zero ──
