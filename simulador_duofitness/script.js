@@ -149,9 +149,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const receitaIncremental = mensNeg > 0 ? Math.max(0, mensNeg - calc.mensalidadeMinima) : 0;
   const temIncremental = receitaIncremental > 0;
   const lucroTotal = calc.lucroFranqueado + receitaIncremental;
-  const royaltiesDRE = temIncremental
-    ? (lucroTotal - calc.manutencao) * ROYALTIES
-    : calc.royalties;
+  const royaltiesDRE = (mensNeg > 0 ? mensNeg : calc.mensalidadeMinima) * ROYALTIES;
 
   const linhas = [
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
