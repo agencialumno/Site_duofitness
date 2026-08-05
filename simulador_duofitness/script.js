@@ -94,7 +94,7 @@ const BASE       = 0.002;
 const BONUS      = 0.002;
 
 // Calcula a cascata completa de um combo e retorna cada etapa para uso na tabela e na DRE.
-const DESPESA_SIMULADOR = 500.00;
+const DESPESA_SIMULADOR = 300.00;
 
 function calcularCascata(combo, temContainer) {
   const d = COMBOS[combo];
@@ -156,7 +156,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const linhas = [
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
-    { label: '(+) Simulador/Aplicativo', valor: calc.despesaSimulador },
+    { label: '(+) App Duo', valor: calc.despesaSimulador },
     { label: '(+) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
     { label: '(+) Lucro do franqueado (30%)', valor: calc.lucroFranqueado },
