@@ -87,16 +87,18 @@ const COMBOS = {
 };
 
 const MARGEM_FRANQUEADO = 0.30;
-const ROYALTIES         = 0.08;
+const ROYALTIES         = 0.10;
 const IMPOSTO_NF         = 0.065;
 
 const BASE       = 0.002;
 const BONUS      = 0.002;
 
 // Calcula a cascata completa de um combo e retorna cada etapa para uso na tabela e na DRE.
+const DESPESA_SIMULADOR = 500.00;
+
 function calcularCascata(combo, temContainer) {
   const d = COMBOS[combo];
-  const subtotalCusto = d.parcela + d.manutencao + (temContainer ? d.container : 0);
+  const subtotalCusto = d.parcela + d.manutencao + DESPESA_SIMULADOR + (temContainer ? d.container : 0);
   const lucroFranqueado = subtotalCusto * MARGEM_FRANQUEADO;
   const subtotalComLucro = subtotalCusto + lucroFranqueado;
   const mensalidadeMinima = subtotalComLucro / (1 - ROYALTIES - IMPOSTO_NF);
@@ -106,6 +108,7 @@ function calcularCascata(combo, temContainer) {
   return {
     parcela: d.parcela,
     manutencao: d.manutencao,
+    despesaSimulador: DESPESA_SIMULADOR,
     container: temContainer ? d.container : 0,
     subtotalCusto,
     lucroFranqueado,
@@ -153,6 +156,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const linhas = [
     { label: 'Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(+) Manutenção preventiva', valor: calc.manutencao },
+    { label: '(+) Simulador/Aplicativo', valor: calc.despesaSimulador },
     { label: '(+) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: 'Subtotal de custos', valor: calc.subtotalCusto, destaque: true },
     { label: '(+) Lucro do franqueado (30%)', valor: calc.lucroFranqueado },
@@ -160,7 +164,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   ];
 
   if (!temIncremental) {
-    linhas.push({ label: '(-) Royalties sobre faturamento (8%)', valor: royaltiesDRE });
+    linhas.push({ label: '(-) Royalties sobre faturamento (10%)', valor: royaltiesDRE });
   }
 
   linhas.push({ label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto });
@@ -170,7 +174,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
 
   if (temIncremental) {
     linhas.push({ label: 'Lucro total do franqueado', valor: lucroTotal, total: true });
-    linhas.push({ label: '(-) Royalties (8%)', valor: royaltiesDRE });
+    linhas.push({ label: '(-) Royalties (10%)', valor: royaltiesDRE });
   }
 
   corpo.innerHTML = linhas.map(l => `
@@ -1018,12 +1022,6 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     zip.file(slidePath, xml);
   }
 
-  // ── Remover o slide de equipamentos extras se não houver nenhum extra adicionado ──
-  const slideExtrasNum = EXTRAS_SLIDE_MAP[combo];
-  if (slideExtrasNum && equipamentosExtras.length === 0) {
-    await removerSlideDoZip(zip, slideExtrasNum);
-  }
-
   // ── Remover slides de equipamentos com quantidade zero ──
   const mapaCombo = SLIDE_MAP[combo];
   if (mapaCombo) {
@@ -1042,6 +1040,56 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       if (todosZerados) {
         await removerSlideDoZip(zip, parseInt(slideNum));
       }
+    }
+  }
+
+  // ── Adicionar slides com foto para equipamentos extras que não existem no combo ativo ──
+  // (sempre copiados do template ELITE, que contém todos os equipamentos possíveis)
+  if (equipamentosExtras.length > 0) {
+    if (!window._eliteZipCache) {
+      const respElite = await fetch('templates/elite.pptx');
+      const bufElite = await respElite.arrayBuffer();
+      window._eliteZipCache = await JSZip.loadAsync(bufElite);
+    }
+    const eliteZip = window._eliteZipCache;
+    const mapaElite = SLIDE_MAP.ELITE;
+
+    // Descobre o número do último slide de equipamento ainda existente no combo (após remoções)
+    const numerosDeEquipamento = Object.values(mapaCombo || {});
+    const maiorSlideEquipCombo = numerosDeEquipamento.length > 0 ? Math.max(...numerosDeEquipamento) : null;
+
+    let ridReferencia = null;
+    if (maiorSlideEquipCombo) {
+      const presRelsAtual = await zip.file('ppt/_rels/presentation.xml.rels').async('string');
+      // Procura pelo maior slide de equipamento que ainda existe (pode ter sido removido se zerado)
+      for (let n = maiorSlideEquipCombo; n >= 1; n--) {
+        const m = presRelsAtual.match(new RegExp(`<Relationship Id="(rId\\d+)"[^>]*Target="slides/slide${n}\\.xml"/>`));
+        if (m) { ridReferencia = m[1]; break; }
+      }
+    }
+
+    // Agrupa os extras por slide de origem (alguns itens dividem o mesmo slide no ELITE)
+    const extrasPorSlide = {};
+    equipamentosExtras.forEach(ex => {
+      const ph = Object.keys(mapaElite).find(chave => {
+        return CATALOGO.ELITE.categorias.some(cat =>
+          cat.itens.some(it => it.curto === ex.curto && it.ph === chave)
+        );
+      });
+      if (!ph) return;
+      const slideNum = mapaElite[ph];
+      if (!extrasPorSlide[slideNum]) extrasPorSlide[slideNum] = {};
+      extrasPorSlide[slideNum][ph] = ex.qtd;
+    });
+
+    for (const [slideNum, phsComQtd] of Object.entries(extrasPorSlide)) {
+      const todosPhsDoSlide = Object.keys(mapaElite).filter(ph => mapaElite[ph] === parseInt(slideNum));
+      const overrideCompleto = {};
+      todosPhsDoSlide.forEach(ph => {
+        overrideCompleto[ph] = phsComQtd[ph] != null ? phsComQtd[ph] : 0;
+      });
+      const novoRidInserido = await copiarSlideParaZip(eliteZip, parseInt(slideNum), zip, overrideCompleto, ridReferencia);
+      ridReferencia = novoRidInserido; // próximo extra entra logo depois deste
     }
   }
 
