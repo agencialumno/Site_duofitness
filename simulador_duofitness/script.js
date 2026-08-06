@@ -808,6 +808,12 @@ const EXTRAS_SLIDE_MAP = {
   ELITE: 40,
 };
 
+const VIDEO_URLS = {
+  TRIPLE: 'https://youtu.be/nAK4zltVKNc',
+  PRIME:  'https://youtu.be/CkySJDdGABY',
+  ELITE:  'https://youtu.be/FvkxhRE5KDo',
+};
+
 function proximoNumeroSlide(zip) {
   const nums = Object.keys(zip.files)
     .map(f => f.match(/^ppt\/slides\/slide(\d+)\.xml$/))
@@ -996,6 +1002,47 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
         } else {
           const runVazio = `<a:r>${rPr}<a:t></a:t></a:r>`;
           xml = xml.replace(runCompleto, runVazio);
+        }
+      }
+    }
+
+   // Texto "VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO": hyperlink aplicado no SHAPE (caixa de texto),
+    // não no run de texto — o PowerPoint sempre força azul/sublinhado quando o link está no texto,
+    // mas quando está no shape a formatação original do texto é preservada
+    if (xml.includes('VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO') && VIDEO_URLS[combo]) {
+      const slideNumMatch = slidePath.match(/slide(\d+)\.xml$/);
+      const slideNumAtual = slideNumMatch ? parseInt(slideNumMatch[1]) : null;
+      const idxTexto = xml.indexOf('VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO');
+
+      if (idxTexto !== -1 && slideNumAtual) {
+        const idxCNvPr = xml.lastIndexOf('<p:cNvPr', idxTexto);
+        const aberturaMatch = idxCNvPr !== -1 ? xml.slice(idxCNvPr).match(/^<p:cNvPr[^>]*?(\/)?>/) : null;
+
+        if (aberturaMatch) {
+          const tagAbertura = aberturaMatch[0];
+          const idxFimAbertura = idxCNvPr + tagAbertura.length;
+
+          const relsPath = `ppt/slides/_rels/slide${slideNumAtual}.xml.rels`;
+          const relsFileExistente = zip.file(relsPath);
+          let relsXml = relsFileExistente
+            ? await relsFileExistente.async('string')
+            : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+          const novoRid = 'rId' + proximoRid(relsXml);
+          relsXml = relsXml.replace(
+            '</Relationships>',
+            `<Relationship Id="${novoRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${VIDEO_URLS[combo]}" TargetMode="External"/></Relationships>`
+          );
+          zip.file(relsPath, relsXml);
+
+          const hlinkTag = `<a:hlinkClick r:id="${novoRid}"/>`;
+          const eraSelfClosing = tagAbertura.endsWith('/>');
+
+          if (eraSelfClosing) {
+            const tagAberta = tagAbertura.slice(0, -2) + '>';
+            xml = xml.slice(0, idxCNvPr) + tagAberta + hlinkTag + '</p:cNvPr>' + xml.slice(idxFimAbertura);
+          } else {
+            xml = xml.slice(0, idxFimAbertura) + hlinkTag + xml.slice(idxFimAbertura);
+          }
         }
       }
     }
