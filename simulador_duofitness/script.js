@@ -1006,46 +1006,6 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       }
     }
 
-   // Texto "VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO": hyperlink aplicado no SHAPE (caixa de texto),
-    // não no run de texto — o PowerPoint sempre força azul/sublinhado quando o link está no texto,
-    // mas quando está no shape a formatação original do texto é preservada
-    if (xml.includes('VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO') && VIDEO_URLS[combo]) {
-      const slideNumMatch = slidePath.match(/slide(\d+)\.xml$/);
-      const slideNumAtual = slideNumMatch ? parseInt(slideNumMatch[1]) : null;
-      const idxTexto = xml.indexOf('VEJA O VÍDEO DE APRESENTAÇÃO DO PROJETO');
-
-      if (idxTexto !== -1 && slideNumAtual) {
-        const idxCNvPr = xml.lastIndexOf('<p:cNvPr', idxTexto);
-        const aberturaMatch = idxCNvPr !== -1 ? xml.slice(idxCNvPr).match(/^<p:cNvPr[^>]*?(\/)?>/) : null;
-
-        if (aberturaMatch) {
-          const tagAbertura = aberturaMatch[0];
-          const idxFimAbertura = idxCNvPr + tagAbertura.length;
-
-          const relsPath = `ppt/slides/_rels/slide${slideNumAtual}.xml.rels`;
-          const relsFileExistente = zip.file(relsPath);
-          let relsXml = relsFileExistente
-            ? await relsFileExistente.async('string')
-            : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
-          const novoRid = 'rId' + proximoRid(relsXml);
-          relsXml = relsXml.replace(
-            '</Relationships>',
-            `<Relationship Id="${novoRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${VIDEO_URLS[combo]}" TargetMode="External"/></Relationships>`
-          );
-          zip.file(relsPath, relsXml);
-
-          const hlinkTag = `<a:hlinkClick r:id="${novoRid}"/>`;
-          const eraSelfClosing = tagAbertura.endsWith('/>');
-
-          if (eraSelfClosing) {
-            const tagAberta = tagAbertura.slice(0, -2) + '>';
-            xml = xml.slice(0, idxCNvPr) + tagAberta + hlinkTag + '</p:cNvPr>' + xml.slice(idxFimAbertura);
-          } else {
-            xml = xml.slice(0, idxFimAbertura) + hlinkTag + xml.slice(idxFimAbertura);
-          }
-        }
-      }
-    }
 
    // Esvazia o texto do bloco "Período Promocional" quando não estiver ativo (sem remover a estrutura do parágrafo)
     if (removerBlocoPromo && xml.includes('Promocional') && xml.includes('- ' + promoMesTxt)) {
@@ -1065,6 +1025,35 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
     }
 
     zip.file(slidePath, xml);
+  }
+
+  // ── Área invisível clicável sobre o botão "Assista o vídeo" (slide final é 100% imagem, sem texto editável) ──
+  const VIDEO_SLIDE_MAP = { TRIPLE: 32, PRIME: 34, ELITE: 42 };
+  const slideVideoNum = VIDEO_SLIDE_MAP[combo];
+  if (slideVideoNum && VIDEO_URLS[combo]) {
+    const slideVideoPath = `ppt/slides/slide${slideVideoNum}.xml`;
+    const slideVideoFile = zip.file(slideVideoPath);
+    if (slideVideoFile) {
+      let xmlVideo = await slideVideoFile.async('string');
+
+      const relsPath = `ppt/slides/_rels/slide${slideVideoNum}.xml.rels`;
+      const relsFileExistente = zip.file(relsPath);
+      let relsXml = relsFileExistente
+        ? await relsFileExistente.async('string')
+        : '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+      const novoRid = 'rId' + proximoRid(relsXml);
+      relsXml = relsXml.replace(
+        '</Relationships>',
+        `<Relationship Id="${novoRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${VIDEO_URLS[combo]}" TargetMode="External"/></Relationships>`
+      );
+      zip.file(relsPath, relsXml);
+
+      // Coordenadas medidas sobre a arte (1920x1080, mesma posição nos 3 combos): cobre todo o banner "Assista o vídeo... Clique aqui"
+      const areaClicavel = `<p:sp><p:nvSpPr><p:cNvPr id="500" name="AreaClicavelVideo"><a:hlinkClick r:id="${novoRid}"/></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="9429750" y="7981950"/><a:ext cx="8763000" cy="1181100"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p/></p:txBody></p:sp>`;
+
+      xmlVideo = xmlVideo.replace('</p:spTree>', areaClicavel + '</p:spTree>');
+      zip.file(slideVideoPath, xmlVideo);
+    }
   }
 
   // ── Remover slides de equipamentos com quantidade zero ──
