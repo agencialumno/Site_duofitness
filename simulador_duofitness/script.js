@@ -1048,7 +1048,7 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       );
       zip.file(relsPath, relsXml);
 
-      // Coordenadas medidas sobre a arte (1920x1080, mesma posição nos 3 combos): cobre todo o banner "Assista o vídeo... Clique aqui"
+      // testeCoordenadas medidas sobre a arte (1920x1080, mesma posição nos 3 combos): cobre todo o banner "Assista o vídeo... Clique aqui"
       const areaClicavel = `<p:sp><p:nvSpPr><p:cNvPr id="500" name="AreaClicavelVideo"><a:hlinkClick r:id="${novoRid}"/></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="9429750" y="7981950"/><a:ext cx="8763000" cy="1181100"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p/></p:txBody></p:sp>`;
 
       xmlVideo = xmlVideo.replace('</p:spTree>', areaClicavel + '</p:spTree>');
