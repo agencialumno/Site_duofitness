@@ -919,7 +919,7 @@ async function copiarSlideParaZip(zipOrigem, slideNumOrigem, zipDestino, quantid
 }
 
 // ── GERA O ZIP COM O PPTX PREENCHIDO (reutilizado por PPTX e PDF) ──
-async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPromo, valorPromo) {
+async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPromo, valorPromo, temContainer) {
   const arquivo = combo.toLowerCase();
 
   if (!window.JSZip) {
@@ -1022,6 +1022,27 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
           xml = xml.slice(0, inicioParagrafo) + paragrafoVazio + xml.slice(fimParagrafo);
         }
       }
+    }
+
+  // Esvazia todo o texto da caixa que contém "Incluso na estrutura do Container..." quando o container NÃO for usado.
+    // Ancora pelo texto único "<a:t>Incluso</a:t>" (não pelo nome do shape, que está duplicado no template — "TextBox 15" existe em duas caixas diferentes)
+    // e localiza os limites reais do shape (<p:sp>...</p:sp>) ao redor desse texto, sem depender do nome.
+    if (!temContainer) {
+      const idxIncluso = xml.indexOf('<a:t>Incluso</a:t>');
+      if (idxIncluso !== -1) {
+        const inicioShape = xml.lastIndexOf('<p:sp>', idxIncluso);
+        const fechamentoShape = xml.indexOf('</p:sp>', idxIncluso);
+        if (inicioShape !== -1 && fechamentoShape !== -1) {
+          const fimShape = fechamentoShape + '</p:sp>'.length;
+          const shapeOriginal = xml.slice(inicioShape, fimShape);
+          const shapeVazio = shapeOriginal.replace(/<a:t>[^<]*<\/a:t>/g, '<a:t></a:t>');
+          xml = xml.slice(0, inicioShape) + shapeVazio + xml.slice(fimShape);
+        }
+      }
+
+      // Desce a caixa "Total de unidades / Valor total / Prazo" para ocupar o espaço
+      // que a caixa do Container deixou vazia, alinhando com o retângulo do BÔNUS logo abaixo.
+      xml = xml.replace('y="1506794"', 'y="3898574"');
     }
 
     zip.file(slidePath, xml);
@@ -1290,6 +1311,7 @@ async function gerarProposta() {
   const prazo = parseInt(document.getElementById('prazo').value);
   const mesesPromo = document.getElementById('mesesPromo').value;
   const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
+  const temContainer = document.getElementById('container').value === 'SIM';
 
   if (!validarCampos()) return;
   if (!verificarRateLimit()) return;
@@ -1301,7 +1323,7 @@ async function gerarProposta() {
   lblBtn.textContent = 'Gerando proposta...';
 
   try {
-    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo);
+    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo, temContainer);
 
     const blob = await zip.generateAsync({
       type: 'blob',
@@ -1396,6 +1418,7 @@ async function gerarPDF() {
   const prazo = parseInt(document.getElementById('prazo').value);
   const mesesPromo = document.getElementById('mesesPromo').value;
   const valorPromo = parseFloat(document.getElementById('mensPromo').value) || 0;
+  const temContainer = document.getElementById('container').value === 'SIM';
 
   if (!validarCampos()) return;
   if (!verificarRateLimit()) return;
@@ -1412,7 +1435,7 @@ async function gerarPDF() {
 
   try {
     // 1. Gerar o PPTX preenchido em memória
-    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo);
+    const { zip } = await gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoOn, mesesPromo, valorPromo, temContainer);
     const pptxBlob = await zip.generateAsync({
       type: 'blob',
       mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
