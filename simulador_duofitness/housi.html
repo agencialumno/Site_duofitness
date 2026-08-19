@@ -1,0 +1,358 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Proposta — Duo Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    if (localStorage.getItem('duofitness_tema') === 'claro')
+      document.documentElement.classList.add('tema-claro');
+  </script>
+  <script type="module">
+  import { verificarAuthHousi, logoutHousi } from './auth-housi.js';
+  import { iniciarTema, alternarTema } from './tema.js';
+  window.logout = logoutHousi;
+  window.alternarTema = alternarTema;
+  document.addEventListener('DOMContentLoaded', () => {
+    verificarAuthHousi();
+    iniciarTema();
+    setTimeout(() => {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }, 2000);
+  });
+</script>
+<script type="module" src="housi.js"></script>
+  </head>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <header class="header">
+    <img class="logo-img" src="assets/Logo sem fundo.png" alt="Duo Fitness"/>
+    <div class="nome-usuario" id="nomeUsuario"></div>
+    <button class="btn-tema" onclick="alternarTema()" title="Mudar tema">🌙</button>
+    <h1 class="header-titulo">Simulador de Proposta <span>Duo Fitness</span></h1>
+  </header>
+  
+
+  <!-- COLUNA ESQUERDA: PREVIEW -->
+  <div class="col-preview">
+    <div class="preview-card">
+      <div class="preview-label">Status da proposta</div>
+      <div class="status-badge status-vazio" id="statusBadge">← Preencha os campos para simular</div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-label">Comissão HOUSI estimada</div>
+      <div class="preview-value muted" id="prevPremiacao">—</div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-label">Mensalidade do condomínio</div>
+      <div class="preview-value muted" id="prevMensTotal">—</div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-label">Valores mínimos por combo</div>
+      <table class="ref-table" id="tabelaRef">
+        <thead>
+          <tr>
+            <th>Combo</th>
+            <th>Mens. Mín.</th>
+            <th>Mín/Unidade</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaRefBody"></tbody>
+      </table>
+    </div>
+
+
+<button class="btn-detalhes" id="btnDetalhes" onclick="abrirModal()">
+  ☰ Ver equipamentos do combo selecionado
+</button>
+
+  </div>
+
+  <!-- COLUNA DIREITA: FORMULÁRIO -->
+  <div class="col-form">
+
+  <div class="tema-toggle-row" onclick="alternarTema()">
+    <span class="tema-toggle-label" id="temaLabel">☀️ Alternar para claro</span>
+    <div class="switch-pill" id="switchTema"></div>
+  </div>
+
+  <div class="campo">
+    <div class="label-row">
+      <label for="nomeCondominio">Nome do Condomínio</label>
+      <div class="tooltip-wrap">
+        <span class="ico-info">i</span>
+        <div class="tooltip-box">Informe o nome completo do condomínio para personalizar a proposta.</div>
+      </div>
+    </div>
+    <input type="text" id="nomeCondominio" placeholder="Ex: Residencial Jardins">
+  </div>
+
+    <div class="campo-grid-2">
+      <div class="campo">
+        <div class="label-row">
+          <label for="combo">Combo</label>
+          <div class="tooltip-wrap">
+            <span class="ico-info">i</span>
+            <div class="tooltip-box">Escolha o pacote de equipamentos que será instalado no condomínio.</div>
+          </div>
+        </div>
+        <select id="combo" onchange="resetarCatalogo(this.value); equipamentosExtras = []; renderizarExtras(); atualizar()">
+  <option value="UNO">UNO</option>
+  <option value="DUO" selected>DUO</option>
+  <option value="TRIPLE">TRIPLE</option>
+  <option value="PRIME">PRIME</option>
+  <option value="ELITE">ELITE</option>
+</select>
+      </div>
+      <div class="campo">
+        <div class="label-row">
+          <label for="prazo">Prazo</label>
+          <div class="tooltip-wrap">
+            <span class="ico-info">i</span>
+            <div class="tooltip-box">Duração do contrato em meses.</div>
+          </div>
+        </div>
+        <select id="prazo" onchange="atualizar()">
+          <option value="36">36 meses</option>
+          <option value="48">48 meses</option>
+          <option value="60" selected>60 meses</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="campo-grid-2">
+      <div class="campo">
+        <div class="label-row">
+          <label for="container">Container</label>
+          <div class="tooltip-wrap">
+            <span class="ico-info">i</span>
+            <div class="tooltip-box">Selecione se a Duo Fitness fornecerá o container ou se o condomínio já possui espaço próprio.</div>
+          </div>
+        </div>
+        <select id="container" onchange="atualizar()">
+          <option value="SIM">SIM — usamos nosso container</option>
+          <option value="NAO">NÃO — condomínio tem espaço</option>
+        </select>
+      </div>
+      <div class="campo">
+        <div class="label-row">
+          <label for="aptos">Nº de Unidades</label>
+          <div class="tooltip-wrap">
+            <span class="ico-info">i</span>
+            <div class="tooltip-box">Total de apartamentos ou unidades do condomínio. Usado para calcular o valor por unidade.</div>
+          </div>
+        </div>
+        <input type="number" id="aptos" value="100" min="1" placeholder="100" oninput="atualizar()">
+      </div>
+    </div>
+
+    <div class="campo-housi" style="
+      position:relative;
+      width:100%;
+      aspect-ratio:1322/183;
+      background-image:url('assets/campo-housi.png');
+      background-size:100% 100%;
+      background-repeat:no-repeat;
+      margin-bottom:16px;
+    ">
+      <div style="
+        position:absolute;
+        left:61.9%; top:25.1%;
+        width:34.8%; height:45.9%;
+        display:flex; align-items:center; gap:4px;
+        padding:0 3%;
+      ">
+        <span style="color:#ff2d78; font-weight:700; font-size:clamp(11px,1.6vw,15px); flex-shrink:0;">R$</span>
+        <input type="number" id="valorHousi" placeholder="Ex.: 500,00" step="0.01" min="0"
+          style="border:none; background:transparent; width:100%; height:100%; font-size:clamp(11px,1.6vw,15px); outline:none; color:#333;"
+          oninput="atualizar()">
+      </div>
+    </div>
+
+    <div class="campo">
+      <div class="label-row">
+        <label for="valorApto">Valor por unidade (R$)</label>
+        <div class="tooltip-wrap">
+          <span class="ico-info">i</span>
+          <div class="tooltip-box">Valor mensal cobrado por unidade (apartamento). A mensalidade total será esse valor × nº de unidades.</div>
+        </div>
+      </div>
+      <div class="input-valor-wrap">
+        <input type="number" id="valorApto" placeholder="0,00" min="0" step="0.01" oninput="atualizarValorAptoHousi()">
+        <span class="prefixo-rs">R$</span>
+      </div>
+      <div class="val-min-ref" id="minRef">Mínimo: <span id="minValDisplay">—</span> por unidade</div>
+    </div>
+
+    <div class="promo-toggle-row" id="promoToggleRow" onclick="togglePromo()">
+      <div class="promo-toggle-left">
+        <span class="promo-toggle-titulo">Período Promocional</span>
+        <span class="promo-toggle-sub">Oferecer desconto nos primeiros meses</span>
+      </div>
+      <div class="switch-pill" id="switchPill"></div>
+    </div>
+
+    <div class="promo-campos" id="promoCampos">
+      <div class="campo">
+        <div class="label-row">
+          <label for="mesesPromo">Período (meses)</label>
+          <input type="number" id="mesesPromo" placeholder="Ex: 3" min="1" max="6" oninput="atualizar()">
+        </div>
+      </div>
+      <div class="campo">
+        <div class="label-row">
+          <label for="mensPromo">Valor por unidade promo (R$)</label>
+          <input type="number" id="mensPromo" placeholder="Ex: 39,97" step="0.01" min="0" oninput="atualizar()">
+        </div>
+      </div>
+    </div>
+
+  <div class="aviso-edicao-form" id="avisoEdicaoSimulador" style="display:none;">
+    ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
+  </div>
+
+  <button class="btn-gerar" id="btnGerar" onclick="gerarProposta()">
+  <div class="spinner"></div>
+  <span class="btn-lbl">Baixar Proposta em PowerPoint</span>
+</button>
+
+<button class="btn-gerar-pdf" id="btnGerarPdf" onclick="gerarPDF()">
+  <div class="spinner"></div>
+  <span class="btn-lbl">Baixar Proposta em PDF</span>
+</button>
+
+
+<div class="btn-row-secundario">
+  <button class="btn-historico" onclick="abrirHistorico()">☰ Histórico</button>
+  <button class="btn-limpar" onclick="limparFormulario()">Limpar</button>
+</div>
+
+<button class="btn-logout" onclick="logout()">Sair</button>
+
+<!-- MODAL HISTÓRICO -->
+<div class="modal-overlay" id="modalHistorico" onclick="fecharHistoricoFora(event)">
+  <div class="modal-box">
+    <button class="modal-fechar" onclick="fecharHistorico()">✕</button>
+    <div class="modal-titulo-combo">Histórico</div>
+    <div class="modal-subtitulo">Últimas 20 propostas geradas</div>
+    <div id="historicoLista"></div>
+  </div>
+</div>
+
+<div class="aviso-combo" id="avisoCombo" style="display:none;">⚠ Combo ainda não disponível — aguardando arquivo PPT</div>
+
+<!-- MODAL EQUIPAMENTOS -->
+<div class="modal-overlay" id="modalOverlay" onclick="fecharModalFora(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-fechar" onclick="fecharModal()">✕</button>
+    <div class="modal-titulo-combo" id="modalNomeCombo">—</div>
+    <div class="modal-subtitulo" id="modalTagCombo">—</div>
+    <div class="modal-equip-grid" id="modalEquipGrid"></div>
+
+    <div class="modal-extras-secao">
+      <div class="modal-equip-titulo">Equipamentos extras adicionados</div>
+      <div id="listaExtras"></div>
+      <button class="btn-detalhes" onclick="abrirModalExtra()" style="margin-top:12px;">
+        + Adicionar equipamento de outro combo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADICIONAR EQUIPAMENTO EXTRA -->
+<div class="modal-overlay" id="extraOverlay">
+  <div class="modal-box" style="width: min(90vw, 420px);">
+    <button class="modal-fechar" onclick="fecharModalExtra()">✕</button>
+    <div class="modal-titulo-combo" style="font-size: 18px;">Adicionar equipamento</div>
+    <div class="modal-subtitulo" style="margin-bottom: 16px;">Escolha o combo, o equipamento e a quantidade</div>
+
+    <div class="campo">
+      <label for="extraCombo">Combo de origem</label>
+      <select id="extraCombo" onchange="atualizarSelectItemExtra()">
+        <option value="UNO">UNO</option>
+        <option value="DUO">DUO</option>
+        <option value="TRIPLE">TRIPLE</option>
+        <option value="PRIME">PRIME</option>
+        <option value="ELITE">ELITE</option>
+      </select>
+    </div>
+
+    <div class="campo" style="margin-top:10px;">
+      <label for="extraItem">Equipamento</label>
+      <select id="extraItem"></select>
+    </div>
+
+    <div class="campo" style="margin-top:10px;">
+      <label for="extraQtd">Quantidade</label>
+      <input type="number" id="extraQtd" min="1" step="1" value="1">
+    </div>
+
+    <div class="btn-row-secundario" style="margin-top: 16px;">
+      <button class="btn-limpar" onclick="fecharModalExtra()">Cancelar</button>
+      <button class="btn-detalhes" onclick="confirmarExtra()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIÇÃO DE ITEM -->
+<div class="modal-overlay" id="edicaoOverlay">
+  <div class="modal-box" style="width: min(90vw, 420px);">
+    <button class="modal-fechar" onclick="fecharEdicaoItem()">✕</button>
+    <div class="modal-titulo-combo" style="font-size: 18px;">Editar item</div>
+    <div class="modal-subtitulo" id="edicaoNomeCompleto" style="margin-bottom: 16px;">—</div>
+
+    <div class="campo">
+      <label for="edicaoQtd">Quantidade</label>
+      <input type="number" id="edicaoQtd" min="0" step="1" oninput="atualizarPreviewValorEdicao()">
+    </div>
+    <div class="val-min-ref" style="margin-top: 8px;">
+      Valor unitário: <span id="edicaoValorUnit">—</span><br>
+      Valor total: <span id="edicaoValorTotal">—</span>
+    </div>
+    <div class="aviso-combo" id="avisoEspacoEdicao" style="display:none; margin-top: 12px;">
+      ⚠ Observação: Verificar o espaço disponível do projeto para o combo escolhido
+    </div>
+
+    <div class="btn-row-secundario" style="margin-top: 16px;">
+      <button class="btn-limpar" onclick="fecharEdicaoItem()">Cancelar</button>
+      <button class="btn-detalhes" onclick="confirmarEdicaoItem()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP DE SALVAMENTO -->
+<div id="popupSalvamento" class="popup-salvamento">
+  <div class="popup-salv-titulo" id="popupTitulo">💾 Salvando proposta...</div>
+  <div class="popup-salv-barra-wrap" id="popupBarraWrap">
+    <div class="popup-salv-barra" id="popupBarra"></div>
+  </div>
+  <div class="popup-salv-pct" id="popupPct">0%</div>
+</div>
+
+<footer class="rodape">
+  <span>Suporte:</span>
+  <a href="mailto:atendimento@agencialumno.com.br">atendimento@agencialumno.com.br</a>
+  <a href="https://wa.me/5521975996032?text=Estou%20precisando%20de%20suporte%20sobre%20o%20simulador%20de%20propostas%20Duo%20Fitness" target="_blank">WhatsApp</a>
+</footer>
+
+<div id="loadingOverlay" style="
+  position: fixed; inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+">
+  <div style="
+    width: 40px; height: 40px;
+    border: 3px solid rgba(254,210,5,0.2);
+    border-top-color: #fed205;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  "></div> 
+</div>
+
+</body>
+</html>

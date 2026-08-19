@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — HOUSI × Duo Fitness</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .login-logo { height: 48px; margin: 0 auto 8px; display: block; }
+    .login-titulo {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .login-sub {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .login-divider::before,
+    .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--borda);
+    }
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      color: #222;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-google:hover { opacity: .9; }
+    .btn-google img { width: 20px; height: 20px; }
+    .login-tabs {
+      display: flex;
+      gap: 0;
+      background: #111;
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .login-tab {
+      flex: 1;
+      padding: 9px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .login-tab.ativo {
+      background: var(--card);
+      color: var(--texto);
+    }
+    .auth-erro {
+      display: none;
+      font-size: 12px;
+      color: var(--vermelho);
+      background: var(--vermelho-dim);
+      border: 1px solid rgba(255,59,59,.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .auth-erro.sucesso {
+  color: var(--verde);
+  background: var(--verde-dim);
+  border-color: rgba(0,200,83,.3);
+}
+
+    .btn-auth {
+      width: 100%;
+      padding: 14px;
+      background: var(--amarelo);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-family: 'Roboto', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+      box-shadow: 0 0 20px rgba(254,210,5,0.35);
+    }
+    .btn-auth:hover { opacity: .9; }
+
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-box">
+      <img class="login-logo" src="assets/Logo sem fundo.png" alt="Duo Fitness">
+      <div class="login-titulo">Acesso Exclusivo</div>
+      <div class="login-sub" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+        <span>Acesso exclusivo</span>
+        <img src="assets/housi.png" alt="Housi" style="height:22px;">
+      </div>
+
+      <button class="btn-google" onclick="loginGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Entrar com Google
+      </button>
+
+      <div class="login-divider">ou</div>
+
+      <div class="login-tabs">
+        <button class="login-tab ativo" id="tabLogin" onclick="trocarTab('login')">Entrar</button>
+        <button class="login-tab" id="tabCadastro" onclick="trocarTab('cadastro')">Cadastrar</button>
+      </div>
+
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="text" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="••••••••">
+      </div>
+
+      <div class="auth-erro" id="authErro"></div>
+
+      <button class="btn-auth" id="btnAuth" onclick="submitAuth()">Entrar</button>
+
+      <div class="login-suporte">
+      <span>Precisa de ajuda?</span>
+      <a href="mailto:atendimento@agencialumno.com.br">atendimento@agencialumno.com.br</a>
+      <a href="https://wa.me/5521975996032?text=Estou%20precisando%20de%20suporte%20sobre%20o%20simulador%20de%20propostas%20Duo%20Fitness" target="_blank">WhatsApp</a>
+</div>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { loginGoogleHousi, loginEmailHousi, cadastrarEmailHousi, processarRedirectHousi } from './auth-housi.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCG6nZw4X8KVPxy_u3CFGuz1COVBPQPHlQ",
+    authDomain: "simulador-duo-fitness.firebaseapp.com",
+    projectId: "simulador-duo-fitness",
+    storageBucket: "simulador-duo-fitness.firebasestorage.app",
+    messagingSenderId: "1029705610423",
+    appId: "1:1029705610423:web:c8a26f127a89a1a7b1c932"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Processa o retorno do login via redirect (mobile)
+  processarRedirectHousi();
+
+  // Esconde o loading ao carregar a página
+  onAuthStateChanged(auth, user => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+  });
+
+  let modoAtual = 'login';
+
+  window.loginGoogle = loginGoogleHousi;
+
+  window.trocarTab = function(modo) {
+    modoAtual = modo;
+    document.getElementById('tabLogin').classList.toggle('ativo', modo === 'login');
+    document.getElementById('tabCadastro').classList.toggle('ativo', modo === 'cadastro');
+    document.getElementById('btnAuth').textContent = modo === 'login' ? 'Entrar' : 'Cadastrar';
+    const erroEl = document.getElementById('authErro');
+    erroEl.style.display = 'none';
+    erroEl.classList.remove('sucesso');
+  };
+
+  window.submitAuth = function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const senha = document.getElementById('loginSenha').value;
+    if (!email || !senha) {
+      document.getElementById('authErro').textContent = 'Preencha e-mail e senha.';
+      document.getElementById('authErro').style.display = 'block';
+      return;
+    }
+    if (modoAtual === 'login') loginEmailHousi(email, senha);
+    else cadastrarEmailHousi(email, senha);
+  };
+</script>
+</body>
+</html>

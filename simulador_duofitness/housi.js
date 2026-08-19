@@ -119,6 +119,16 @@ function calcularCascata(combo, temContainer) {
   };
 }
 
+function calcularCascataHousi(combo, temContainer, valorComissaoHousi) {
+  const d = COMBOS[combo];
+  const subtotalCusto = d.parcela + d.manutencao + DESPESA_SIMULADOR + (temContainer ? d.container : 0);
+  const lucroFranqueado = subtotalCusto * MARGEM_FRANQUEADO;
+  const subtotalComLucro = subtotalCusto + lucroFranqueado;
+  const divisor = 1 - ROYALTIES - IMPOSTO_NF;
+  const mensalidadeMinima = divisor > 0 ? (subtotalComLucro + (valorComissaoHousi || 0)) / divisor : Infinity;
+  return { parcela: d.parcela, manutencao: d.manutencao, container: temContainer ? d.container : 0, subtotalCusto, lucroFranqueado, subtotalComLucro, mensalidadeMinima };
+}
+
 function recalcularParcela(combo) {
   const d = COMBOS[combo];
 
@@ -484,93 +494,101 @@ function atualizar() {
   const comboSel = document.getElementById('combo').value;
   verificarItensEditados(comboSel);
 
-  ['nomeCondominio','aptos','valorApto','mesesPromo','mensPromo'].forEach(id => {
+  ['nomeCondominio','aptos','valorApto','mesesPromo','mensPromo','valorHousi'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.value) limparErro(id);
   });
-  const combo   = document.getElementById('combo').value;
-  const prazo   = parseInt(document.getElementById('prazo').value);
-  const cont    = document.getElementById('container').value;
-  const aptos   = parseFloat(document.getElementById('aptos').value) || 0;
-  const vApto   = parseFloat(document.getElementById('valorApto').value);
+
+  const combo          = document.getElementById('combo').value;
+  const prazo           = parseInt(document.getElementById('prazo').value);
+  const cont             = document.getElementById('container').value;
+  const aptos            = parseFloat(document.getElementById('aptos').value) || 0;
+  const vApto            = parseFloat(document.getElementById('valorApto').value);
+  const valorComissaoHousi = parseFloat(document.getElementById('valorHousi').value) || 0;
+
   let mPromo = parseFloat(document.getElementById('mesesPromo').value) || 0;
   if (mPromo > 6) {
     document.getElementById('mesesPromo').value = 6;
     mPromo = 6;
     setErro('mesesPromo', 'O período promocional é limitado a 6 meses.');
   }
-  const mPromoV = parseFloat(document.getElementById('mensPromo').value) || 0;
 
-  const calc = calcularCascata(combo, cont === 'SIM');
-  const mensCli = calc.mensalidadeMinima;
-  const minApto = aptos > 0 ? mensCli / aptos : 0;
-
+  const calc = calcularCascataHousi(combo, cont === 'SIM', valorComissaoHousi);
+  const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
   document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
-  construirTabelaRef(cont, aptos);
-  renderizarDRE(combo, cont, aptos, vApto > 0 && aptos > 0 ? vApto * aptos : 0);
+  construirTabelaRefHousi(cont, aptos, valorComissaoHousi);
 
-  if (!vApto || aptos === 0) { setVazio(); return; }
+  if (!vApto || aptos === 0 || !valorComissaoHousi) { setVazio(); return; }
 
   const mensNeg = vApto * aptos;
-  const contNeg = mensNeg * prazo;
-
-  const contMin = calc.mensalidadeMinima * prazo;
-  const extra    = Math.max(0, contNeg - contMin);
-  const comBase  = contNeg * BASE;
-  const comBonus = extra * BONUS;
-  const comTotal = comBase + comBonus;
-  const comCSS   = comTotal;
-  const pct = vApto / minApto - 1;
   const abaixoDoMinimo = vApto < minApto;
 
   document.getElementById('btnGerar').disabled = abaixoDoMinimo;
   document.getElementById('btnGerarPdf').disabled = abaixoDoMinimo;
 
-  let statusClass, statusTxt;
-  if (vApto < minApto) {
-    statusClass = 'status-bloqueado';
-    statusTxt = '❌ BLOQUEADO — Valor abaixo do mínimo para este combo.';
-  } else if (pct < 0.05) {
-    statusClass = 'status-minimo';
-    statusTxt = '⚠ NO MÍNIMO — Premiação mínima. Tente subir o valor!';
-  } else if (pct < 0.15) {
-    statusClass = 'status-bom';
-    statusTxt = '✔ BOM NEGÓCIO — Aprovado! Ainda há margem para crescer.';
-  } else if (pct < 0.25) {
-    statusClass = 'status-otimo';
-    statusTxt = '🚀 ÓTIMO NEGÓCIO — Excelente! Sua premiação está crescendo.';
+  const badge = document.getElementById('statusBadge');
+  if (abaixoDoMinimo) {
+    badge.className = 'status-badge status-bloqueado';
+    badge.textContent = `❌ BLOQUEADO — Valor abaixo do necessário para entregar ${fmt(valorComissaoHousi)} de comissão mensal. Mínimo: ${fmt(minApto)} por unidade.`;
   } else {
-    statusClass = 'status-maximo';
-    statusTxt = '⭐ MÁXIMO — Premiação no topo! Melhor proposta possível.';
+    badge.className = 'status-badge status-bom';
+    badge.textContent = '✔ Valor válido — comissão HOUSI garantida.';
   }
 
-  const badge = document.getElementById('statusBadge');
-  badge.className = 'status-badge ' + statusClass;
-  badge.textContent = statusTxt;
+  const comissaoReal = mensNeg * (1 - ROYALTIES - IMPOSTO_NF) - calc.subtotalComLucro;
 
   const elPrem = document.getElementById('prevPremiacao');
-  if (vApto < minApto) {
-    elPrem.textContent = 'R$ 0,00';
-    elPrem.className = 'preview-value vermelho';
-  } else {
-    elPrem.textContent = fmt(comCSS);
-    elPrem.className = 'preview-value ' + (pct >= 0.25 ? 'amarelo' : 'verde');
-  }
+  elPrem.textContent = abaixoDoMinimo ? 'R$ 0,00' : fmt(comissaoReal);
+  elPrem.className = 'preview-value ' + (abaixoDoMinimo ? 'vermelho' : 'amarelo');
 
   const elMens = document.getElementById('prevMensTotal');
   elMens.textContent = fmt(mensNeg);
-  elMens.className = 'preview-value ' + (vApto < minApto ? 'vermelho' : 'amarelo');
-
-  // Validar valor promocional em tempo real
-  if (promoOn && mPromoV > 0 && minApto > 0) {
-    if (mPromoV < minApto) {
-      setErro('mensPromo', `Valor promocional abaixo do mínimo permitido (${fmt(minApto)} por unidade).`);
-    } else {
-      limparErro('mensPromo');
-    }
-  }
+  elMens.className = 'preview-value ' + (abaixoDoMinimo ? 'vermelho' : 'amarelo');
 
   salvarDados();
+}
+
+
+// Sincroniza o campo de comissão com o valor real, mas SÓ quando o "valor por unidade" muda
+// (nunca enquanto o usuário está digitando dentro do próprio campo de comissão)
+function atualizarValorAptoHousi() {
+  atualizar();
+
+  const combo    = document.getElementById('combo').value;
+  const cont     = document.getElementById('container').value;
+  const aptos    = parseFloat(document.getElementById('aptos').value) || 0;
+  const vApto    = parseFloat(document.getElementById('valorApto').value);
+  const valorComissaoHousi = parseFloat(document.getElementById('valorHousi').value) || 0;
+
+  if (!vApto || aptos === 0 || !valorComissaoHousi) return;
+
+  const calc = calcularCascataHousi(combo, cont === 'SIM', valorComissaoHousi);
+  const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
+  const abaixoDoMinimo = vApto < minApto;
+  if (abaixoDoMinimo) return;
+
+  const mensNeg = vApto * aptos;
+  const comissaoReal = mensNeg * (1 - ROYALTIES - IMPOSTO_NF) - calc.subtotalComLucro;
+
+  if (Math.abs(comissaoReal - valorComissaoHousi) > 0.01) {
+    document.getElementById('valorHousi').value = comissaoReal.toFixed(2);
+    atualizar();
+  }
+}
+window.atualizarValorAptoHousi = atualizarValorAptoHousi;
+
+function construirTabelaRefHousi(cont, aptos, valorComissaoHousi) {
+  const corpo = document.getElementById('tabelaRefBody');
+  const comboAtivo = document.getElementById('combo').value;
+  corpo.innerHTML = '';
+  Object.keys(COMBOS).forEach((nome) => {
+    const calc = calcularCascataHousi(nome, cont === 'SIM', valorComissaoHousi);
+    const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
+    const tr = document.createElement('tr');
+    if (nome === comboAtivo) tr.classList.add('ativo');
+    tr.innerHTML = `<td>${nome}</td><td>${fmt(calc.mensalidadeMinima)}</td><td>${aptos > 0 ? fmt(minApto) : '—'}</td>`;
+    corpo.appendChild(tr);
+  });
 }
 
 function abrirModal() {
@@ -1199,7 +1217,8 @@ function validarCampos() {
   } else {
     const comboV = document.getElementById('combo').value;
     const contV  = document.getElementById('container').value;
-    const minAptoV = calcularCascata(comboV, contV === 'SIM').mensalidadeMinima / (aptos || 1);
+    const valorHousiV = parseFloat(document.getElementById('valorHousi').value) || 0;
+    const minAptoV = calcularCascataHousi(comboV, contV === 'SIM', valorHousiV).mensalidadeMinima / (aptos || 1);
     if (aptos > 0 && vApto < minAptoV) {
       setErro('valorApto', `Valor abaixo do mínimo permitido para este combo (${fmt(minAptoV)} por unidade).`);
       primeiroInvalido = primeiroInvalido || 'valorApto';
@@ -1225,7 +1244,8 @@ function validarCampos() {
       const combo   = document.getElementById('combo').value;
       const cont    = document.getElementById('container').value;
       const aptosV  = parseFloat(document.getElementById('aptos').value) || 0;
-      const mensCliV = calcularCascata(combo, cont === 'SIM').mensalidadeMinima;
+      const valorHousiV = parseFloat(document.getElementById('valorHousi').value) || 0;
+      const mensCliV = calcularCascataHousi(combo, cont === 'SIM', valorHousiV).mensalidadeMinima;
       const minApto = aptosV > 0 ? mensCliV / aptosV : 0;
 
       if (minApto > 0 && vPromo < minApto) {
@@ -1747,6 +1767,6 @@ async function iniciarHeartbeat(user) {
 
 document.addEventListener('DOMContentLoaded', () => {
   restaurarDados();
-  construirTabelaRef('SIM', 100);
+  construirTabelaRefHousi('SIM', 100, 0);
   atualizar();
 });
