@@ -156,7 +156,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
 
   const linhas = [
     { label: 'Valor Bruto', valor: lucroBruto, total: true },
-    { label: '(÷) Por unidade (' + (aptos || 0) + ')', valor: minApto, total: true },
+    { label: 'Adicional sobre o valor mínimo da proposta', valor: receitaIncremental, total: true },
     { label: '(-) Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(-) Manutenção preventiva', valor: calc.manutencao },
     { label: '(-) App Duo', valor: calc.despesaSimulador },
