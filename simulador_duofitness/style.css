@@ -1617,8 +1617,9 @@ html.tema-claro .dre-table tr.dre-subtotal td {
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
+  width: fit-content;
 }
 .aviso-comissao.mostrar {
   display: block;

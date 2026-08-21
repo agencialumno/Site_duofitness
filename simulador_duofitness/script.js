@@ -522,8 +522,9 @@ function atualizar() {
   const atingiu20 = pctExibidoNum >= 20;
   const royaltiesAtual = mensNeg * ROYALTIES;
   const royaltiesMinimo = minApto * aptos * ROYALTIES;
+  const pctBonus = Math.min(pct, 0.50);
   const comCSS = atingiu20
-    ? royaltiesAtual * (1 + pct)
+    ? royaltiesAtual * (1 + pctBonus)
     : royaltiesAtual;
   const abaixoDoMinimo = vApto < minApto;
 
@@ -534,11 +535,16 @@ function atualizar() {
   if (avisoComissao) {
     avisoComissao.classList.remove('mostrar', 'atencao', 'sucesso');
     if (abaixoDoMinimo) {
-      // fica escondido
+      const valorSugerido20 = Math.ceil(minApto * 1.1995 * 100) / 100;
+      avisoComissao.textContent = `⚠ Valor abaixo do mínimo, experimente colocar: ${fmt(valorSugerido20)}`;
+      avisoComissao.classList.add('mostrar', 'atencao');
     } else if (!atingiu20) {
       const valorSugerido = Math.ceil(minApto * 1.1995 * 100) / 100;
       avisoComissao.textContent = `⚠ O valor inserido é ${pctExibido}% maior que o mínimo. Experimente colocar o valor: ${fmt(valorSugerido)}`;
       avisoComissao.classList.add('mostrar', 'atencao');
+    } else if (pctExibidoNum >= 50) {
+      avisoComissao.textContent = `Você está ganhando 50% de comissão`;
+      avisoComissao.classList.add('mostrar', 'sucesso');
     } else {
       const diferencaReais = comCSS - royaltiesMinimo;
       avisoComissao.textContent = `O valor inserido é ${pctExibido}% maior que o mínimo, você está ganhando ${fmt(diferencaReais)} a mais de comissão`;
