@@ -543,7 +543,8 @@ function atualizar() {
       avisoComissao.textContent = `⚠ O valor inserido é ${pctExibido}% maior que o mínimo. Experimente colocar o valor: ${fmt(valorSugerido)}`;
       avisoComissao.classList.add('mostrar', 'atencao');
     } else if (pctExibidoNum >= 50) {
-      avisoComissao.textContent = `Você está ganhando 50% de comissão`;
+      const diferencaReais = comCSS - royaltiesMinimo;
+      avisoComissao.textContent = `Você está ganhando 50% a mais do valor da sua comissão, ${fmt(diferencaReais)}`;
       avisoComissao.classList.add('mostrar', 'sucesso');
     } else {
       const diferencaReais = comCSS - royaltiesMinimo;
