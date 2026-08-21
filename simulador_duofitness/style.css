@@ -1600,3 +1600,42 @@ html.tema-claro .dre-table tr.dre-subtotal td {
   cursor: pointer;
 }
 .extra-item-remover:hover { background: var(--vermelho-dim); }
+
+.val-min-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.val-min-ref {
+  flex-shrink: 0;
+}
+.aviso-comissao {
+  display: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+}
+.aviso-comissao.mostrar {
+  display: block;
+}
+.aviso-comissao.atencao {
+  background: rgba(254, 210, 5, 0.08);
+  border: 1px dashed var(--amarelo);
+  color: var(--amarelo);
+}
+.aviso-comissao.sucesso {
+  background: rgba(0, 200, 83, 0.08);
+  border: 1px solid var(--verde);
+  color: var(--verde);
+}
+
+html.tema-claro .aviso-comissao.atencao {
+  color: #8a6800;
+  border-color: #8a6800;
+  background: rgba(180,130,0,0.08);
+}

@@ -47,6 +47,10 @@
       <div class="preview-value muted" id="prevPremiacao">—</div>
     </div>
     <div class="preview-card">
+      <div class="preview-label">Bônus por negociação acima do mínimo</div>
+      <div class="preview-value muted" id="prevBonus">—</div>
+    </div>
+    <div class="preview-card">
       <div class="preview-label">Mensalidade do condomínio</div>
       <div class="preview-value muted" id="prevMensTotal">—</div>
     </div>
@@ -169,7 +173,10 @@
         <input type="number" id="valorApto" placeholder="0,00" min="0" step="0.01" oninput="atualizar()">
         <span class="prefixo-rs">R$</span>
       </div>
-      <div class="val-min-ref" id="minRef">Mínimo: <span id="minValDisplay">—</span> por unidade</div>
+      <div class="val-min-linha">
+        <div class="val-min-ref" id="minRef">Mínimo: <span id="minValDisplay">—</span> por unidade</div>
+        <div class="aviso-comissao" id="avisoComissao"></div>
+      </div>
     </div>
 
     <div class="promo-toggle-row" id="promoToggleRow" onclick="togglePromo()">

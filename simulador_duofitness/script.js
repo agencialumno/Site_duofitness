@@ -474,10 +474,14 @@ function setVazio() {
   document.getElementById('statusBadge').textContent = '← Preencha os campos para simular';
   document.getElementById('prevPremiacao').className = 'preview-value muted';
   document.getElementById('prevPremiacao').textContent = '—';
+  document.getElementById('prevBonus').className = 'preview-value muted';
+  document.getElementById('prevBonus').textContent = '—';
   document.getElementById('prevMensTotal').className = 'preview-value muted';
   document.getElementById('prevMensTotal').textContent = '—';
   document.getElementById('btnGerar').disabled = true;
   document.getElementById('btnGerarPdf').disabled = true;
+  const avisoComissao = document.getElementById('avisoComissao');
+  if (avisoComissao) avisoComissao.classList.remove('mostrar', 'atencao', 'sucesso');
 }
 
 function atualizar() {
@@ -503,7 +507,7 @@ function atualizar() {
 
   const calc = calcularCascata(combo, cont === 'SIM');
   const mensCli = calc.mensalidadeMinima;
-  const minApto = aptos > 0 ? mensCli / aptos : 0;
+  const minApto = aptos > 0 ? Math.round((mensCli / aptos) * 100) / 100 : 0;
 
   document.getElementById('minValDisplay').textContent = aptos > 0 ? fmt(minApto) : '—';
   construirTabelaRef(cont, aptos);
@@ -512,19 +516,35 @@ function atualizar() {
   if (!vApto || aptos === 0) { setVazio(); return; }
 
   const mensNeg = vApto * aptos;
-  const contNeg = mensNeg * prazo;
-
-  const contMin = calc.mensalidadeMinima * prazo;
-  const extra    = Math.max(0, contNeg - contMin);
-  const comBase  = contNeg * BASE;
-  const comBonus = extra * BONUS;
-  const comTotal = comBase + comBonus;
-  const comCSS   = comTotal;
   const pct = vApto / minApto - 1;
+  const pctExibidoNum = Math.round(pct * 1000) / 10;
+  const pctExibido = pctExibidoNum.toFixed(1);
+  const atingiu20 = pctExibidoNum >= 20;
+  const royaltiesAtual = mensNeg * ROYALTIES;
+  const royaltiesMinimo = minApto * aptos * ROYALTIES;
+  const comCSS = atingiu20
+    ? royaltiesAtual * (1 + pct)
+    : royaltiesAtual;
   const abaixoDoMinimo = vApto < minApto;
 
   document.getElementById('btnGerar').disabled = abaixoDoMinimo;
   document.getElementById('btnGerarPdf').disabled = abaixoDoMinimo;
+
+  const avisoComissao = document.getElementById('avisoComissao');
+  if (avisoComissao) {
+    avisoComissao.classList.remove('mostrar', 'atencao', 'sucesso');
+    if (abaixoDoMinimo) {
+      // fica escondido
+    } else if (!atingiu20) {
+      const valorSugerido = Math.ceil(minApto * 1.1995 * 100) / 100;
+      avisoComissao.textContent = `⚠ O valor inserido é ${pctExibido}% maior que o mínimo. Experimente colocar o valor: ${fmt(valorSugerido)}`;
+      avisoComissao.classList.add('mostrar', 'atencao');
+    } else {
+      const diferencaReais = comCSS - royaltiesMinimo;
+      avisoComissao.textContent = `O valor inserido é ${pctExibido}% maior que o mínimo, você está ganhando ${fmt(diferencaReais)} a mais de comissão`;
+      avisoComissao.classList.add('mostrar', 'sucesso');
+    }
+  }
 
   let statusClass, statusTxt;
   if (vApto < minApto) {
@@ -553,8 +573,18 @@ function atualizar() {
     elPrem.textContent = 'R$ 0,00';
     elPrem.className = 'preview-value vermelho';
   } else {
-    elPrem.textContent = fmt(comCSS);
+    elPrem.textContent = fmt(royaltiesAtual);
     elPrem.className = 'preview-value ' + (pct >= 0.25 ? 'amarelo' : 'verde');
+  }
+
+  const elBonus = document.getElementById('prevBonus');
+  if (vApto < minApto) {
+    elBonus.textContent = 'R$ 0,00';
+    elBonus.className = 'preview-value vermelho';
+  } else {
+    const bonus = comCSS - royaltiesAtual;
+    elBonus.textContent = fmt(bonus);
+    elBonus.className = 'preview-value ' + (bonus > 0 ? 'verde' : 'muted');
   }
 
   const elMens = document.getElementById('prevMensTotal');
@@ -1199,7 +1229,7 @@ function validarCampos() {
   } else {
     const comboV = document.getElementById('combo').value;
     const contV  = document.getElementById('container').value;
-    const minAptoV = calcularCascata(comboV, contV === 'SIM').mensalidadeMinima / (aptos || 1);
+    const minAptoV = Math.round((calcularCascata(comboV, contV === 'SIM').mensalidadeMinima / (aptos || 1)) * 100) / 100;
     if (aptos > 0 && vApto < minAptoV) {
       setErro('valorApto', `Valor abaixo do mínimo permitido para este combo (${fmt(minAptoV)} por unidade).`);
       primeiroInvalido = primeiroInvalido || 'valorApto';
@@ -1226,7 +1256,7 @@ function validarCampos() {
       const cont    = document.getElementById('container').value;
       const aptosV  = parseFloat(document.getElementById('aptos').value) || 0;
       const mensCliV = calcularCascata(combo, cont === 'SIM').mensalidadeMinima;
-      const minApto = aptosV > 0 ? mensCliV / aptosV : 0;
+      const minApto = aptosV > 0 ? Math.round((mensCliV / aptosV) * 100) / 100 : 0;
 
       if (minApto > 0 && vPromo < minApto) {
         setErro('mensPromo', `Valor promocional abaixo do mínimo permitido (${fmt(minApto)} por unidade).`);
