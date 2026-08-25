@@ -1,0 +1,86 @@
+:root {
+  --amarelo: #fed205;
+  --preto: #000000;
+  --branco: #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'facto', sans-serif;
+  background-color: var(--preto);
+  color: var(--branco);
+  padding: 40px 24px;
+}
+
+#leads-header {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+}
+
+#leads-header h1 {
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+#leads-header h1 em {
+  font-style: italic;
+  color: var(--amarelo);
+}
+
+#leads-total {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+}
+
+#leads-main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+#leads-status {
+  padding: 24px 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#leads-tabela-wrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(254, 210, 5, 0.25);
+  border-radius: 8px;
+}
+
+#leads-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+#leads-tabela th,
+#leads-tabela td {
+  padding: 14px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#leads-tabela thead th {
+  background-color: #0d0d0d;
+  color: var(--amarelo);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+#leads-tabela tbody tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#leads-tabela tbody tr:hover {
+  background-color: rgba(254, 210, 5, 0.05);
+}
+
+@media (max-width: 768px) {
+  body { padding: 24px 12px; }
+  #leads-tabela th, #leads-tabela td { padding: 10px 12px; font-size: 0.85rem; }
+}

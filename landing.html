@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Duo Fitness — Leve uma academia completa para o seu condomínio. Fale com a gente." />
+  <link rel="icon" type="image/png" href="assets/logo/simbolo.png" />
+  <title>Duo Fitness | Quero saber mais</title>
+
+  <!-- Adobe Fonts: Facto -->
+  <link rel="stylesheet" href="https://use.typekit.net/mda3ytr.css" />
+
+  <link rel="stylesheet" href="landing.css" />
+</head>
+<body>
+
+<!-- HERO -->
+<section id="lp-hero">
+  <div id="lp-hero-bg">
+    <img src="assets/images/Hero.png" alt="Academia Duo Fitness" />
+    <div id="lp-hero-overlay"></div>
+  </div>
+  <div id="lp-hero-conteudo">
+    <img src="assets/logo/Logo.png" alt="Duo Fitness" id="lp-logo" />
+    <h1>Uma academia completa <em>dentro do seu condomínio.</em></h1>
+    <p class="subtitulo">Sem obras, sem burocracia e sem sair de casa. Deixe seus dados que a gente te explica como funciona.</p>
+    <a href="#lp-form" class="btn btn-amarelo" id="lp-hero-cta">Quero saber mais</a>
+  </div>
+</section>
+
+<!-- BENEFÍCIOS -->
+<section id="lp-beneficios">
+  <h2>Por que trazer a <em>Duo Fitness</em> para o seu condomínio?</h2>
+  <div id="lp-beneficios-grid">
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">01</span>
+      <h3>Academia 24h completa</h3>
+      <p>Cardio, musculação e pesos livres em um espaço premium, pronto para uso a qualquer hora.</p>
+    </div>
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">02</span>
+      <h3>Instalação sem obras</h3>
+      <p>Estrutura modular em container, instalada em poucos dias, sem reforma e sem dor de cabeça.</p>
+    </div>
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">03</span>
+      <h3>Manutenção inclusa</h3>
+      <p>Equipamentos, manutenção preventiva e reposição por nossa conta — o condomínio não se preocupa com nada disso.</p>
+    </div>
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">04</span>
+      <h3>App exclusivo</h3>
+      <p>Treinos personalizados, ranking e desafios direto no bolso dos moradores.</p>
+    </div>
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">05</span>
+      <h3>Valorização do imóvel</h3>
+      <p>Um diferencial real na hora de vender ou alugar uma unidade no condomínio.</p>
+    </div>
+    <div class="lp-beneficio-card">
+      <span class="lp-beneficio-num">06</span>
+      <h3>Receita ou economia</h3>
+      <p>Modelos flexíveis — do custo compartilhado entre moradores até parceria com franqueado local.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FORMULÁRIO -->
+<section id="lp-form">
+  <div id="lp-form-conteudo">
+    <h2>Quero saber mais <em>sobre a Duo Fitness</em></h2>
+    <p class="subtitulo">Preencha seus dados e nossa equipe entra em contato.</p>
+
+    <form id="lp-lead-form" autocomplete="off">
+      <!-- honeypot anti-spam -->
+      <input type="text" id="lp-website" name="website" class="lp-honeypot" tabindex="-1" autocomplete="off" />
+
+      <div class="lp-campo">
+        <label for="lp-nome">Nome</label>
+        <input type="text" id="lp-nome" name="nome" required />
+      </div>
+
+      <div class="lp-campo">
+        <label for="lp-whatsapp">WhatsApp</label>
+        <input type="tel" id="lp-whatsapp" name="whatsapp" placeholder="(21) 90000-0000" required />
+      </div>
+
+      <div class="lp-campo">
+        <label for="lp-email">E-mail</label>
+        <input type="email" id="lp-email" name="email" required />
+      </div>
+
+      <div class="lp-campo">
+        <label for="lp-cidade">Cidade</label>
+        <input type="text" id="lp-cidade" name="cidade" required />
+      </div>
+
+      <div class="lp-campo">
+        <label for="lp-perfil">Você é</label>
+        <select id="lp-perfil" name="perfil" required>
+          <option value="" disabled selected>Selecione</option>
+          <option value="sindico">Síndico(a) / administrador de condomínio</option>
+          <option value="morador">Morador(a) de condomínio</option>
+          <option value="franqueado">Interessado em ser franqueado</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+
+      <button type="submit" id="lp-form-btn" class="btn btn-amarelo">Enviar</button>
+
+      <p id="lp-form-msg" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<footer id="lp-footer">
+  <p>&copy; <span id="lp-ano"></span> Duo Fitness. Todos os direitos reservados.</p>
+</footer>
+
+<!-- MODAL DE AGRADECIMENTO -->
+<div id="lp-modal-overlay">
+  <div id="lp-modal">
+    <button id="lp-modal-fechar" aria-label="Fechar">×</button>
+    <span id="lp-modal-icone">✓</span>
+    <h3>Obrigado por mandar seu contato!</h3>
+    <p>Em breve entraremos em contato.</p>
+    <button id="lp-modal-ok" class="btn btn-amarelo">Fechar</button>
+  </div>
+</div>
+
+<script type="module" src="landing.js"></script>
+</body>
+</html>
