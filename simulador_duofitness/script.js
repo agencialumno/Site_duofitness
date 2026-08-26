@@ -160,7 +160,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
     { label: '(-) Valor da parcela do equipamento', valor: calc.parcela },
     { label: '(-) Manutenção preventiva', valor: calc.manutencao },
     { label: '(-) App Duo', valor: calc.despesaSimulador },
-    { label: '(-) Container + Estrutura' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
+    { label: '(-) Estrutura Modular' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: '(-) Royalties sobre faturamento (10%)', valor: royaltiesDRE },
     { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
     { label: 'Subtotal de custos', valor: subtotalCustos, destaque: true },
