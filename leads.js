@@ -9,12 +9,12 @@ import {
 
 // ⚠️ Mesmo firebaseConfig usado no landing.js
 const firebaseConfig = {
-  apiKey: "COLE_AQUI",
+  apiKey: "AIzaSyCG6nZw4X8KVPxy_u3CFGuz1COVBPQPHlQ",
   authDomain: "simulador-duo-fitness.firebaseapp.com",
   projectId: "simulador-duo-fitness",
   storageBucket: "simulador-duo-fitness.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI",
+  messagingSenderId: "1029705610423",
+  appId: "1:1029705610423:web:c8a26f127a89a1a7b1c932",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -36,11 +36,21 @@ function formatarData(timestamp) {
   });
 }
 
-const PERFIL_LABEL = {
-  sindico: 'Síndico(a)',
-  morador: 'Morador(a)',
-  franqueado: 'Franqueado',
-  outro: 'Outro',
+const CAPITAL_LABEL = {
+  ate_80k: 'Até R$ 80 mil',
+  '80_120k': 'R$ 80–120 mil',
+  '120_200k': 'R$ 120–200 mil',
+  acima_200k: 'Acima de R$ 200 mil',
+};
+
+const OPERACAO_LABEL = {
+  sim: 'Sim',
+  passivo: 'Investimento passivo',
+};
+
+const SIM_NAO_LABEL = {
+  sim: 'Sim',
+  nao: 'Não',
 };
 
 async function carregarLeads() {
@@ -62,7 +72,9 @@ async function carregarLeads() {
         <td>${d.whatsapp ?? '—'}</td>
         <td>${d.email ?? '—'}</td>
         <td>${d.cidade ?? '—'}</td>
-        <td>${PERFIL_LABEL[d.perfil] ?? d.perfil ?? '—'}</td>
+        <td>${CAPITAL_LABEL[d.capital] ?? d.capital ?? '—'}</td>
+        <td>${OPERACAO_LABEL[d.operacao] ?? d.operacao ?? '—'}</td>
+        <td>${SIM_NAO_LABEL[d.mesmaCidade] ?? d.mesmaCidade ?? '—'}</td>
       `;
       tbody.appendChild(tr);
     });
