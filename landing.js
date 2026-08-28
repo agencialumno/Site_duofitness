@@ -117,16 +117,19 @@ if (form) {
       });
 
       form.reset();
-      abrirModal();
 
       // Dispara evento no GTM — use isso como gatilho de "Evento personalizado"
-      // pra acionar Meta Pixel, Google Ads etc. só quando o lead é enviado.
+      // pra acionar Meta Pixel, Google Ads etc. Também dá pra usar a visualização
+      // da obrigado.html como conversão (mais simples de configurar).
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         event: 'lead_formulario_franquia',
         lead_cidade: cidade,
         lead_capital: capital,
       });
+
+      window.location.href = 'obrigado.html';
+      return;
     } catch (err) {
       console.error('Erro ao salvar lead:', err);
       mostrarMsg('Não foi possível enviar agora. Tente novamente em instantes.', 'erro');
@@ -134,59 +137,5 @@ if (form) {
       btn.disabled = false;
       btn.textContent = 'Quero abrir minha franquia';
     }
-  });
-}
-
-/* ---- FORMATOS — seletor interativo ---- */
-const formatoDados = {
-  uno: { nome: 'UNO', estrutura: '1 container', area: '~30 m²', frase: 'O ponto de entrada ideal pra testar o modelo, com o menor investimento e a estrutura mais compacta.', img: 'assets/images/uno.png' },
-  duo: { nome: 'DUO', estrutura: '2 containers', area: '~60 m²', frase: 'Dobro de capacidade e mais potencial de atendimento, mantendo a operação enxuta.', img: 'assets/images/duo.png' },
-  triple: { nome: 'TRIPLE', estrutura: '3 containers', area: '~90 m²', frase: 'Equilíbrio entre porte e investimento, pensado pra praças com mais demanda.', img: 'assets/images/triple.png' },
-  prime: { nome: 'PRIME', estrutura: '4 containers', area: '~120 m²', frase: 'Estrutura robusta pra regiões com maior potencial de alunos e ticket médio.', img: 'assets/images/prime.png' },
-  elite: { nome: 'ELITE', estrutura: '5 containers', area: '~150 m²', frase: 'O topo da linha — estrutura completa pra quem quer entrar grande na rede.', img: 'assets/images/elite.png' },
-};
-
-function trocarFormato(chave) {
-  const dados = formatoDados[chave];
-  if (!dados) return;
-
-  document.getElementById('formato-nome').textContent = dados.nome;
-  document.getElementById('formato-frase').textContent = dados.frase;
-  document.getElementById('formato-estrutura').textContent = dados.estrutura;
-  document.getElementById('formato-area').textContent = dados.area;
-
-  const img = document.getElementById('formato-img-atual');
-  img.style.opacity = '0';
-  setTimeout(() => {
-    img.src = dados.img;
-    img.style.opacity = '1';
-  }, 200);
-
-  document.querySelectorAll('.formato-nav-item').forEach((btn) => {
-    btn.classList.toggle('ativo', btn.dataset.formato === chave);
-  });
-}
-
-document.querySelectorAll('.formato-nav-item').forEach((btn) => {
-  btn.addEventListener('click', () => trocarFormato(btn.dataset.formato));
-});
-
-/* ---- NAV — menu hamburguer mobile ---- */
-const navToggle = document.getElementById('lp-nav-toggle');
-const navLinks = document.getElementById('lp-nav-links');
-
-if (navToggle && navLinks) {
-  navToggle.addEventListener('click', () => {
-    const aberto = navLinks.classList.toggle('aberto');
-    navToggle.classList.toggle('aberto', aberto);
-    navToggle.setAttribute('aria-expanded', aberto ? 'true' : 'false');
-  });
-
-  navLinks.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('aberto');
-      navToggle.classList.remove('aberto');
-      navToggle.setAttribute('aria-expanded', 'false');
-    });
   });
 }

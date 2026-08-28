@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-KXPZ4TS8');</script>
+  <!-- End Google Tag Manager -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Duo Fitness | Inscrição confirmada</title>
+  <link rel="icon" type="image/png" href="assets/logo/simbolo.png" />
+
+  <!-- Adobe Fonts: Facto -->
+  <link rel="stylesheet" href="https://use.typekit.net/mda3ytr.css" />
+
+  <link rel="stylesheet" href="landing.css" />
+  <link rel="stylesheet" href="obrigado.css" />
+</head>
+<body>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KXPZ4TS8"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<div class="lp-luz lp-luz-1"></div>
+<div class="lp-luz lp-luz-2"></div>
+
+<main id="obrigado-conteudo">
+  <img src="assets/logo/Logo.png" alt="Duo Fitness" id="obrigado-logo" />
+
+  <span id="obrigado-icone">✓</span>
+
+  <h1>Inscrição confirmada!</h1>
+  <p class="subtitulo">Recebemos seus dados. Em breve, alguém do nosso time de expansão vai entrar em contato pra avaliar seu perfil e sua região.</p>
+
+  <div id="obrigado-progresso">
+    <div id="obrigado-progresso-header">
+      <span>Seu cadastro</span>
+      <span id="obrigado-progresso-percent">90%</span>
+    </div>
+    <div id="obrigado-progresso-trilha">
+      <div id="obrigado-progresso-fill"></div>
+    </div>
+    <p id="obrigado-progresso-legenda">Falta só um passo: seguir a Duo Fitness no Instagram.</p>
+  </div>
+
+  <div id="obrigado-proximo">
+    <span id="obrigado-proximo-tag">Próximo passo</span>
+    <p>Enquanto isso, siga a Duo Fitness no Instagram e acompanhe a expansão da rede, novidades e bastidores.</p>
+    <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" id="obrigado-seguir-btn" class="btn btn-amarelo">Seguir @duofitness.ofc</a>
+  </div>
+
+  <a href="landing.html" id="obrigado-voltar">Voltar para a página inicial</a>
+</main>
+
+<footer id="lp-footer">
+  <p>Duo Fitness — Academias Modulares · CNPJ 68.340.915/0001-80 · Rio de Janeiro/RJ</p>
+</footer>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const fill = document.getElementById('obrigado-progresso-fill');
+    setTimeout(() => {
+      fill.style.width = '90%';
+    }, 300);
+  });
+
+  const seguirBtn = document.getElementById('obrigado-seguir-btn');
+  if (seguirBtn) {
+    seguirBtn.addEventListener('click', () => {
+      document.getElementById('obrigado-progresso-fill').style.width = '100%';
+      document.getElementById('obrigado-progresso-percent').textContent = '100%';
+      document.getElementById('obrigado-progresso-legenda').textContent = 'Tudo pronto! Obrigado por seguir a Duo Fitness.';
+    });
+  }
+</script>
+
+</body>
+</html>
