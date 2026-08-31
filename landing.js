@@ -122,6 +122,7 @@ if (form) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nome, whatsapp, email, cidade, capital, operacao, mesmaCidade }),
+        keepalive: true,
       }).catch((err) => console.error('Erro ao enviar pro HubSpot:', err));
 
       form.reset();
