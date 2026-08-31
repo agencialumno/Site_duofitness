@@ -116,6 +116,14 @@ if (form) {
         criadoEm: serverTimestamp(),
       });
 
+      // Envia também pro HubSpot CRM via Worker — não bloqueia o fluxo
+      // se falhar (o lead já está salvo no Firestore de qualquer forma).
+      fetch('https://duofitness-crm.lumno-contato.workers.dev/criar-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, whatsapp, email, cidade, capital, operacao, mesmaCidade }),
+      }).catch((err) => console.error('Erro ao enviar pro HubSpot:', err));
+
       form.reset();
 
       // Dispara evento no GTM — use isso como gatilho de "Evento personalizado"
