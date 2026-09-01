@@ -166,13 +166,30 @@ form.addEventListener('submit', async (e) => {
   try {
     // Sem cabeçalho Content-Type customizado de propósito — evita o
     // preflight CORS que o Google Apps Script não trata bem.
-    await fetch(SHEETS_WEBAPP_URL, {
+    const resp = await fetch(SHEETS_WEBAPP_URL, {
       method: 'POST',
       body: JSON.stringify({ nome, cpf, email, telefone, consentimento }),
     });
+    const resultado = await resp.json();
+
+    if (!resultado.sucesso) {
+      if (resultado.jaCadastrado) {
+        mostrarErro('Este CPF já está cadastrado. Cada pessoa pode se cadastrar apenas uma vez.');
+      } else {
+        mostrarErro('Não foi possível enviar agora. Tente novamente em instantes.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Enviar';
+      return;
+    }
 
     form.style.display = 'none';
     sucessoEl.classList.add('visivel');
+    document.getElementById('cad-titulo').innerHTML = 'Parabéns! <em>Você agora faz parte do futuro do wellness.</em>';
+    document.getElementById('cad-subtitulo').textContent = 'Falta apenas uma etapa: a validação do pagamento para confirmar sua franquia.';
+    setTimeout(() => {
+      document.getElementById('cad-progresso-fill').style.width = '90%';
+    }, 300);
     exibirPix();
   } catch (err) {
     console.error('Erro ao enviar cadastro:', err);

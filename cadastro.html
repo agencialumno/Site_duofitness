@@ -20,8 +20,8 @@
 <main id="cad-conteudo">
   <img src="assets/logo/Logo.png" alt="Duo Fitness" id="cad-logo" />
 
-  <h1>Bem-vindo à <em>Duo Fitness!</em></h1>
-  <p class="subtitulo">Deixe seus dados e seja um dos primeiros a saber das novidades da rede.</p>
+  <h1 id="cad-titulo">Bem-vindo à <br><em>rede Duo Fitness.</em></h1>
+  <p class="subtitulo" id="cad-subtitulo">Falta pouco para você fazer parte da nossa expansão. Preencha seus dados para seguir com a formalização.</p>
 
   <form id="cad-form" autocomplete="off">
     <!-- honeypot anti-spam -->
@@ -59,8 +59,19 @@
 
   <div id="cad-sucesso">
     <span id="cad-sucesso-icone">✓</span>
-    <h2>Cadastro realizado!</h2>
-    <p>Obrigado por se cadastrar na Duo Fitness.</p>
+    <h2>Cadastro confirmado!</h2>
+<p>Seus dados foram registrados. O próximo passo é a validação do pagamento abaixo para dar sequência à sua franquia.</p>
+
+    <div id="cad-progresso">
+      <div id="cad-progresso-header">
+        <span>Seu cadastro</span>
+        <span id="cad-progresso-percent">90%</span>
+      </div>
+      <div id="cad-progresso-trilha">
+        <div id="cad-progresso-fill"></div>
+      </div>
+      <p id="cad-progresso-legenda">Falta apenas uma etapa: confirmar o pagamento.</p>
+    </div>
 
     <div id="cad-pix-area">
       <span class="formatos-tag">Pagamento via PIX</span>
