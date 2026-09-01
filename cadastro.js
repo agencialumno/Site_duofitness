@@ -6,10 +6,10 @@ const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyId58kxAXrkl
    Enquanto CHAVE estiver como placeholder, a seção de PIX fica
    escondida (não mostra um QR Code quebrado pros usuários). */
 const PIX_CONFIG = {
-  chave: 'COLE_AQUI_SUA_CHAVE_PIX', // CPF, CNPJ, e-mail, telefone ou chave aleatória
-  nomeRecebedor: 'DUO FITNESS', // até 25 caracteres, sem acento
-  cidade: 'RIO DE JANEIRO', // até 15 caracteres, sem acento
-  valor: null, // deixe null para "valor livre" (a pessoa digita quanto pagar)
+  chave: '68340915000180', // CNPJ da Duo Fitness (confirmado via QR Code oficial Bradesco)
+  nomeRecebedor: 'DUO FITNESS',
+  cidade: 'RIO DE JANEIRO',
+  valor: null, // valor livre — a pessoa digita quanto pagar no app do banco
 };
 
 function removerAcentos(str) {
@@ -38,7 +38,7 @@ function gerarPayloadPix({ chave, nomeRecebedor, cidade, valor }) {
   const nomeLimpo = removerAcentos(nomeRecebedor).slice(0, 25);
   const cidadeLimpa = removerAcentos(cidade).slice(0, 15);
 
-  const merchantAccountInfo = tlv('00', 'br.gov.bcb.pix') + tlv('01', chave);
+  const merchantAccountInfo = tlv('00', 'BR.GOV.BCB.PIX') + tlv('01', chave);
   const additionalData = tlv('05', '***'); // txid genérico (PIX estático)
 
   let payload =
