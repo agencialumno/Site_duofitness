@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Duo Fitness | Cadastro</title>
+  <link rel="icon" type="image/png" href="assets/logo/simbolo.png" />
+
+  <!-- Adobe Fonts: Facto -->
+  <link rel="stylesheet" href="https://use.typekit.net/mda3ytr.css" />
+
+  <link rel="stylesheet" href="cadastro.css" />
+</head>
+<body>
+
+<div class="cad-luz cad-luz-1"></div>
+<div class="cad-luz cad-luz-2"></div>
+
+<main id="cad-conteudo">
+  <img src="assets/logo/Logo.png" alt="Duo Fitness" id="cad-logo" />
+
+  <h1>Bem-vindo à <em>Duo Fitness!</em></h1>
+  <p class="subtitulo">Deixe seus dados e seja um dos primeiros a saber das novidades da rede.</p>
+
+  <form id="cad-form" autocomplete="off">
+    <!-- honeypot anti-spam -->
+    <input type="text" id="cad-website" name="website" class="cad-honeypot" tabindex="-1" autocomplete="off" />
+
+    <div class="cad-campo">
+      <label for="cad-nome">Nome completo</label>
+      <input type="text" id="cad-nome" name="nome" required />
+    </div>
+
+    <div class="cad-campo">
+      <label for="cad-cpf">CPF</label>
+      <input type="text" id="cad-cpf" name="cpf" placeholder="000.000.000-00" inputmode="numeric" required />
+    </div>
+
+    <div class="cad-campo">
+      <label for="cad-email">Seu melhor e-mail</label>
+      <input type="email" id="cad-email" name="email" required />
+    </div>
+
+    <div class="cad-campo">
+      <label for="cad-telefone">Telefone</label>
+      <input type="tel" id="cad-telefone" name="telefone" placeholder="(21) 90000-0000" required />
+    </div>
+
+    <label id="cad-lgpd">
+      <input type="checkbox" id="cad-consentimento" name="consentimento" required />
+      <span>Autorizo a Duo Fitness a armazenar e utilizar meus dados pessoais para contato, conforme a Lei Geral de Proteção de Dados (LGPD).</span>
+    </label>
+
+    <button type="submit" id="cad-btn" class="btn btn-amarelo">Enviar</button>
+
+    <p id="cad-msg" role="status"></p>
+  </form>
+
+  <div id="cad-sucesso">
+    <span id="cad-sucesso-icone">✓</span>
+    <h2>Cadastro realizado!</h2>
+    <p>Obrigado por se cadastrar na Duo Fitness.</p>
+
+    <div id="cad-pix-area">
+      <span class="formatos-tag">Pagamento via PIX</span>
+      <p id="cad-pix-texto">Escaneie o QR Code ou use o Pix Copia e Cola para validar o fechamento da franquia.</p>
+      <div id="cad-pix-qr"></div>
+      <div id="cad-pix-copiaecola">
+        <input type="text" id="cad-pix-input" readonly />
+        <button type="button" id="cad-pix-copiar" class="btn btn-amarelo">Copiar</button>
+      </div>
+      <p id="cad-pix-copiado">Copiado!</p>
+    </div>
+  </div>
+
+  <p id="cad-nota-pagamento">Para validar o fechamento da compra da franquia, é necessário o pagamento de, no mínimo, 10% do valor total.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="cadastro.js"></script>
+</body>
+</html>
