@@ -147,12 +147,11 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const minApto = aptos > 0 ? calc.mensalidadeMinima / aptos : 0;
 
   const receitaIncremental = mensNeg > 0 ? Math.max(0, mensNeg - calc.mensalidadeMinima) : 0;
-  const royaltiesDRE = (mensNeg > 0 ? mensNeg : calc.mensalidadeMinima) * ROYALTIES;
-
-  // Lucro do franqueado bruto: valor total da mensalidade (negociada, se já houver; senão a mínima)
   const lucroBruto = mensNeg > 0 ? mensNeg : calc.mensalidadeMinima;
+  const royaltiesDRE = lucroBruto * ROYALTIES;
+  const impostoDRE   = lucroBruto * IMPOSTO_NF;
   const subtotalCustos = calc.parcela + calc.manutencao + calc.despesaSimulador + calc.container;
-  const lucroLiquido = lucroBruto - subtotalCustos - royaltiesDRE - calc.imposto;
+  const lucroLiquido = lucroBruto - subtotalCustos - royaltiesDRE - impostoDRE;
 
   const linhas = [
     { label: 'Valor Bruto', valor: lucroBruto, total: true },
@@ -162,7 +161,7 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
     { label: '(-) App Duo', valor: calc.despesaSimulador },
     { label: '(-) Estrutura Modular' + (cont === 'SIM' ? '' : ' (não contratado)'), valor: calc.container },
     { label: '(-) Royalties sobre faturamento (10%)', valor: royaltiesDRE },
-    { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: calc.imposto },
+    { label: '(-) Imposto / NF sobre faturamento (6,5%)', valor: impostoDRE },
     { label: 'Subtotal de custos', valor: subtotalCustos, destaque: true },
     { label: 'Lucro líquido do franqueado', valor: lucroLiquido, total: true },
   ];
