@@ -1640,3 +1640,7 @@ html.tema-claro .aviso-comissao.atencao {
   border-color: #8a6800;
   background: rgba(180,130,0,0.08);
 }
+
+.aviso-comissao.sem-permissao {
+  display: none !important;
+}

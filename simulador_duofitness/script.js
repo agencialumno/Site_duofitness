@@ -450,6 +450,14 @@ function aplicarPermissoes(role) {
   // Premiação: visível para admin e vendedor
   const cardPremiacao = document.getElementById('prevPremiacao')?.closest('.preview-card');
   if (cardPremiacao) cardPremiacao.style.display = (role === 'admin' || role === 'vendedor') ? '' : 'none';
+
+  // Bônus por negociação acima do mínimo: visível para admin e vendedor
+  const cardBonus = document.getElementById('prevBonus')?.closest('.preview-card');
+  if (cardBonus) cardBonus.style.display = (role === 'admin' || role === 'vendedor') ? '' : 'none';
+
+  // Aviso de comissão (embaixo do campo "Valor por unidade"): visível para admin e vendedor
+  const aviso = document.getElementById('avisoComissao');
+  if (aviso) aviso.classList.toggle('sem-permissao', !(role === 'admin' || role === 'vendedor'));
 }
 
 window.aplicarPermissoes = aplicarPermissoes;
