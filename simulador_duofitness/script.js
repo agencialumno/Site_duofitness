@@ -150,8 +150,8 @@ function renderizarDRE(combo, cont, aptos, mensNeg) {
   const lucroBruto = mensNeg > 0 ? mensNeg : calc.mensalidadeMinima;
   const royaltiesDRE = lucroBruto * ROYALTIES;
   const impostoDRE   = lucroBruto * IMPOSTO_NF;
-  const subtotalCustos = calc.parcela + calc.manutencao + calc.despesaSimulador + calc.container;
-  const lucroLiquido = lucroBruto - subtotalCustos - royaltiesDRE - impostoDRE;
+  const subtotalCustos = calc.parcela + calc.manutencao + calc.despesaSimulador + calc.container + royaltiesDRE + impostoDRE;
+  const lucroLiquido = lucroBruto - subtotalCustos;
 
   const linhas = [
     { label: 'Valor Bruto', valor: lucroBruto, total: true },
