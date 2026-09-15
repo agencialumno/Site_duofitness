@@ -529,7 +529,7 @@ function atualizar() {
   const atingiu20 = pctExibidoNum >= 20;
   const royaltiesAtual = mensNeg * ROYALTIES;
   const royaltiesMinimo = minApto * aptos * ROYALTIES;
-  const pctBonus = Math.min(pct, 1.00);
+  const pctBonus = Math.min(pct, 1.00);//teste
   const comCSS = atingiu20
     ? royaltiesAtual * (1 + pctBonus)
     : royaltiesAtual;
