@@ -9,9 +9,10 @@
       document.documentElement.classList.add('tema-claro');
   </script>
   <script type="module">
-    import { verificarAuth, logout } from './auth.js';
+    import { verificarAuth, logout, alterarSenha } from './auth.js';
     import { iniciarTema, alternarTema } from './tema.js';
     window.logout = logout;
+    window.alterarSenha = alterarSenha;
     window.alternarTema = alternarTema;
     document.addEventListener('DOMContentLoaded', () => {
       verificarAuth();
@@ -225,6 +226,7 @@
   <button class="btn-limpar" onclick="limparFormulario()">Limpar</button>
 </div>
 
+<button class="btn-logout-secundario" onclick="alterarSenha()">Alterar senha</button>
 <button class="btn-logout" onclick="logout()">Sair</button>
 
 <!-- MODAL HISTÓRICO -->

@@ -1,6 +1,6 @@
 // ── FIREBASE AUTH + FIRESTORE ──
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, GoogleAuthProvider, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -216,4 +216,26 @@ async function logout() {
   window.location.href = 'login.html';
 }
 
-export { loginGoogle, loginEmail, cadastrarEmail, verificarAuth, logout, processarRedirect };
+async function alterarSenha() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  // Login via Google não tem senha própria — não faz sentido enviar reset nesse caso
+  const provedores = user.providerData.map(p => p.providerId);
+  if (!provedores.includes('password')) {
+    alert('Sua conta usa login com Google e não possui senha cadastrada.');
+    return;
+  }
+
+  if (!confirm(`Enviar um e-mail de redefinição de senha para ${user.email}?`)) return;
+
+  try {
+    await sendPasswordResetEmail(auth, user.email);
+    alert('E-mail enviado! Verifique sua caixa de entrada para criar uma nova senha.');
+  } catch (e) {
+    console.error(e);
+    alert('Não foi possível enviar o e-mail. Tente novamente mais tarde.');
+  }
+}
+
+export { loginGoogle, loginEmail, cadastrarEmail, verificarAuth, logout, processarRedirect, alterarSenha };

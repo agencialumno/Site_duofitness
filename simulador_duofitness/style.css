@@ -1679,3 +1679,22 @@ html.tema-claro .aviso-comissao.atencao {
 html.tema-claro .dre-seta {
   color: #8a6800;
 }
+
+.btn-logout-secundario {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: transparent;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  color: var(--muted);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.btn-logout-secundario:hover {
+  border-color: var(--amarelo);
+  color: var(--amarelo);
+}
