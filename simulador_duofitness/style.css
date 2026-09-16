@@ -1645,21 +1645,42 @@ html.tema-claro .aviso-comissao.atencao {
   display: none !important;
 }
 
-.dre-toggle {
+.btn-dre-toggle {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: var(--card);
+  border: 1px solid var(--amarelo);
+  border-radius: 10px;
+  color: var(--amarelo);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  user-select: none;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: .03em;
+  transition: background .2s, box-shadow .2s;
+}
+.btn-dre-toggle:hover {
+  box-shadow: 0 0 0 3px var(--amarelo-dim);
 }
 .dre-seta {
-  font-size: 12px;
+  font-size: 11px;
   transition: transform 0.2s ease;
-  color: var(--muted);
 }
 .dre-seta.aberta {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 .dre-table.dre-colapsada {
   display: none;
+}
+html.tema-claro .btn-dre-toggle {
+  color: #8a6800;
+  border-color: #8a6800;
+}
+html.tema-claro .btn-dre-toggle:hover {
+  box-shadow: 0 0 0 3px rgba(180,130,0,0.10);
 }

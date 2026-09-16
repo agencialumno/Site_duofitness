@@ -69,10 +69,11 @@
     </div>
 
     <div class="preview-card">
-      <div class="preview-label dre-toggle" id="dreToggle" onclick="alternarDRE()">
-        <span>Memória de cálculo — combo selecionado</span>
-        <span class="dre-seta" id="dreSeta">▸</span>
-      </div>
+      <div class="preview-label">Memória de cálculo — combo selecionado</div>
+      <button class="btn-dre-toggle" id="dreToggle" onclick="alternarDRE()">
+        <span id="dreToggleTexto">Expandir</span>
+        <span class="dre-seta" id="dreSeta">▾</span>
+      </button>
       <table class="ref-table dre-table dre-colapsada" id="tabelaDRE">
         <tbody id="tabelaDREBody"></tbody>
       </table>
