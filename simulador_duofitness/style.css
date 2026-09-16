@@ -1644,3 +1644,22 @@ html.tema-claro .aviso-comissao.atencao {
 .aviso-comissao.sem-permissao {
   display: none !important;
 }
+
+.dre-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.dre-seta {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  color: var(--muted);
+}
+.dre-seta.aberta {
+  transform: rotate(90deg);
+}
+.dre-table.dre-colapsada {
+  display: none;
+}

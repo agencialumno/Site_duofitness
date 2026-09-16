@@ -460,6 +460,15 @@ function aplicarPermissoes(role) {
   if (aviso) aviso.classList.toggle('sem-permissao', !(role === 'admin' || role === 'vendedor'));
 }
 
+function alternarDRE() {
+  const tabela = document.getElementById('tabelaDRE');
+  const seta = document.getElementById('dreSeta');
+  if (!tabela || !seta) return;
+  tabela.classList.toggle('dre-colapsada');
+  seta.classList.toggle('aberta');
+}
+window.alternarDRE = alternarDRE;
+
 window.aplicarPermissoes = aplicarPermissoes;
 
 function construirTabelaRef(cont, aptos) {
