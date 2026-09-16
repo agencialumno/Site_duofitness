@@ -463,12 +463,11 @@ function aplicarPermissoes(role) {
 function alternarDRE() {
   const tabela = document.getElementById('tabelaDRE');
   const seta = document.getElementById('dreSeta');
-  const texto = document.getElementById('dreToggleTexto');
-  if (!tabela || !seta || !texto) return;
-  const abrindo = tabela.classList.contains('dre-colapsada');
+  const header = document.getElementById('dreHeader');
+  if (!tabela || !seta || !header) return;
   tabela.classList.toggle('dre-colapsada');
   seta.classList.toggle('aberta');
-  texto.textContent = abrindo ? 'Ocultar' : 'Expandir';
+  header.classList.toggle('dre-expandida');
 }
 window.alternarDRE = alternarDRE;
 
