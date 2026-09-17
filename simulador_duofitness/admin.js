@@ -124,35 +124,46 @@ function ouvirOnline() {
 
 // ── PROPOSTAS ──
 async function carregarPropostas() {
-  const q = query(collection(db, 'logs_propostas'), orderBy('data', 'desc'), limit(200));
-  const snap = await getDocs(q);
-  todasPropostas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const q = query(collection(db, 'logs_propostas'), orderBy('data', 'desc'));
+  return new Promise((resolve) => {
+    let primeiraCarga = true;
+    onSnapshot(q, snap => {
+      todasPropostas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  // Métricas
-  const total = todasPropostas.length;
-  const pptx  = todasPropostas.filter(p => p.tipo === 'PPTX').length;
-  const pdf   = todasPropostas.filter(p => p.tipo === 'PDF').length;
-  const mes   = todasPropostas.filter(p => {
-    const d = new Date(p.data);
-    const agora = new Date();
-    return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
-  }).length;
+      // Métricas (total real, sem limite, separado por tipo)
+      const total = todasPropostas.length;
+      const pptx  = todasPropostas.filter(p => p.tipo === 'PPTX').length;
+      const pdf   = todasPropostas.filter(p => p.tipo === 'PDF').length;
+      const mes   = todasPropostas.filter(p => {
+        const d = new Date(p.data);
+        const agora = new Date();
+        return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
+      }).length;
 
-  document.getElementById('metricaTotal').textContent = total;
-  document.getElementById('metricaPptx').textContent = pptx;
-  document.getElementById('metricaPdf').textContent = pdf;
-  document.getElementById('metricaMes').textContent = mes;
+      document.getElementById('metricaTotal').textContent = total;
+      document.getElementById('metricaPptx').textContent = pptx;
+      document.getElementById('metricaPdf').textContent = pdf;
+      document.getElementById('metricaMes').textContent = mes;
 
-  // Popular filtro de usuários
-  const emails = [...new Set(todasPropostas.map(p => p.vendedor))];
-  const sel = document.getElementById('filtroUsuario');
-  emails.forEach(e => {
-    const opt = document.createElement('option');
-    opt.value = e; opt.textContent = e;
-    sel.appendChild(opt);
+      // Popular filtro de usuários (só na primeira carga, pra não duplicar opções no <select>)
+      if (primeiraCarga) {
+        const emails = [...new Set(todasPropostas.map(p => p.vendedor))];
+        const sel = document.getElementById('filtroUsuario');
+        emails.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e; opt.textContent = e;
+          sel.appendChild(opt);
+        });
+      }
+
+      renderizarPropostas(todasPropostas);
+
+      if (primeiraCarga) {
+        primeiraCarga = false;
+        resolve();
+      }
+    });
   });
-
-  renderizarPropostas(todasPropostas);
 }
 
 function renderizarPropostas(lista) {
