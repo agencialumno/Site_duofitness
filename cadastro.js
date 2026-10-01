@@ -182,6 +182,31 @@ form.addEventListener('submit', async (e) => {
       btn.textContent = 'Enviar';
       return;
     }
+         // Envia também pro CRM Duo (Lovable) — não bloqueia o fluxo
+    fetch('https://duo-style-template.lovable.app/api/public/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        nome,
+        whatsapp: telefone,
+        email,
+        cidade: '',
+        capital: '',
+        operacao: '',
+        mesmaCidade: '',
+        origem: 'site_cadastro',
+        attribution: {
+          utm_source: new URLSearchParams(window.location.search).get('utm_source') || '',
+          utm_medium: new URLSearchParams(window.location.search).get('utm_medium') || '',
+          utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') || '',
+          gclid: new URLSearchParams(window.location.search).get('gclid') || '',
+          fbclid: new URLSearchParams(window.location.search).get('fbclid') || '',
+          landing_page: window.location.href,
+          referrer: document.referrer || '',
+        },
+      }),
+    }).catch((err) => console.error('Erro ao enviar pro CRM:', err));
 
     form.style.display = 'none';
     sucessoEl.classList.add('visivel');
