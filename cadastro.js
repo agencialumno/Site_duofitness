@@ -183,7 +183,7 @@ form.addEventListener('submit', async (e) => {
       return;
     }
          // Envia também pro CRM Duo (Lovable) — não bloqueia o fluxo
-    fetch('https://duo-style-template.lovable.app/api/public/leads', {
+    fetch('https://lp.duofitnessoficial.com.br/api/public/leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       keepalive: true,
