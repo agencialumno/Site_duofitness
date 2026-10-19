@@ -856,6 +856,8 @@ const EXTRAS_SLIDE_MAP = {
 };
 
 const VIDEO_URLS = {
+  UNO:    'https://youtu.be/sQur_pF8gF8',
+  DUO:    'https://youtu.be/2mlN_7UDO38',
   TRIPLE: 'https://youtu.be/nAK4zltVKNc',
   PRIME:  'https://youtu.be/CkySJDdGABY',
   ELITE:  'https://youtu.be/FvkxhRE5KDo',
@@ -1096,7 +1098,7 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
   }
 
   // ── Área invisível clicável sobre o botão "Assista o vídeo" (slide final é 100% imagem, sem texto editável) ──
-  const VIDEO_SLIDE_MAP = { TRIPLE: 32, PRIME: 34, ELITE: 42 };
+  const VIDEO_SLIDE_MAP = { UNO: 24, DUO: 28, TRIPLE: 32, PRIME: 34, ELITE: 42 };
   const slideVideoNum = VIDEO_SLIDE_MAP[combo];
   if (slideVideoNum && VIDEO_URLS[combo]) {
     const slideVideoPath = `ppt/slides/slide${slideVideoNum}.xml`;
@@ -1383,7 +1385,7 @@ async function gerarProposta() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Proposta Duo Fitness ${combo} - ${nomeRaw}.pptx`;
+    a.download = `${nomeArquivoPdf(nomeRaw, combo)}.pptx`;
     document.body.appendChild(a); a.click();
     await salvarNoStorage(blob, `Proposta Duo Fitness ${combo} - ${nomeRaw}.pptx`, 'PPTX');
     document.body.removeChild(a); URL.revokeObjectURL(url);
@@ -1454,6 +1456,15 @@ function abrirAbaLoading() {
   return novaAba;
 }
 
+// Nome do arquivo PDF: Proposta_[condomínio]_[combo].pdf (sem acentos/espaços/caracteres especiais)
+function nomeArquivoPdf(nomeCondominio, combo) {
+  const limpo = (nomeCondominio || 'Condominio')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return `Proposta_${limpo || 'Condominio'}_${combo}`;
+}
+
 async function gerarPDF() {
   const btnPdf  = document.getElementById('btnGerarPdf');
   const lblPdf  = btnPdf.querySelector('.btn-lbl');
@@ -1502,11 +1513,13 @@ async function gerarPDF() {
             operation: 'convert',
             input: 'upload-pptx',
             input_format: 'pptx',
-            output_format: 'pdf'
+            output_format: 'pdf',
+            filename: `${nomeArquivoPdf(nomeRaw, combo)}.pdf`
           },
           'export-pdf': {
             operation: 'export/url',
-            input: 'convert-pdf'
+            input: 'convert-pdf',
+            inline: true
           }
         }
       })
@@ -1523,7 +1536,7 @@ async function gerarPDF() {
 
     const formData = new FormData();
     Object.entries(uploadParams).forEach(([k, v]) => formData.append(k, v));
-    formData.append('file', pptxBlob, `proposta_${combo.toLowerCase()}.pptx`);
+    formData.append('file', pptxBlob, `${nomeArquivoPdf(nomeRaw, combo)}.pptx`);
 
     const upRes = await fetch(uploadUrl, { method: 'POST', body: formData });
     if (!upRes.ok) throw new Error('Erro ao fazer upload para o CloudConvert.');
@@ -1559,15 +1572,13 @@ async function gerarPDF() {
     salvarHistorico('PDF');
     await registrarLog(combo, nomeRaw, 'PDF', `Proposta Duo Fitness ${combo} - ${nomeRaw}.pdf`);
 
-    // Exibe o PDF na aba já aberta, mantendo o simulador na aba original
-    const url = URL.createObjectURL(pdfBlob);
+    // Exibe o PDF na aba já aberta (URL do CloudConvert já carrega o nome do arquivo)
     if (novaAba) {
-      novaAba.location.href = url;
+      novaAba.location.href = pdfUrl;
     } else {
       // fallback caso o navegador tenha bloqueado a abertura antecipada
-      window.open(url, '_blank', 'noopener');
+      window.open(pdfUrl, '_blank', 'noopener');
     }
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
 
     } catch(e) {
     if (novaAba) novaAba.close();
