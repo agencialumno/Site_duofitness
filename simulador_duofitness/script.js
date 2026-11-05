@@ -967,6 +967,22 @@ async function copiarSlideParaZip(zipOrigem, slideNumOrigem, zipDestino, quantid
   return novoRid;
 }
 
+// Remove um grupo inteiro (<p:grpSp>) do slide pelo nome do grupo (ex.: BLOCO_PROMO)
+function removerGrupoPorNome(xml, nome) {
+  const idx = xml.indexOf('name="' + nome + '"');
+  if (idx === -1) return xml;
+  const ini = xml.lastIndexOf('<p:grpSp>', idx);
+  if (ini === -1) return xml;
+  const re = /<p:grpSp>|<\/p:grpSp>/g;
+  re.lastIndex = ini;
+  let nivel = 0, m;
+  while ((m = re.exec(xml)) !== null) {
+    nivel += m[0] === '<p:grpSp>' ? 1 : -1;
+    if (nivel === 0) return xml.slice(0, ini) + xml.slice(m.index + m[0].length);
+  }
+  return xml;
+}
+
 // ── GERA O ZIP COM O PPTX PREENCHIDO (reutilizado por PPTX e PDF) ──
 async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPromo, valorPromo, temContainer) {
   const arquivo = combo.toLowerCase();
@@ -1055,6 +1071,21 @@ async function gerarZip(combo, nomeRaw, aptos, vApto, prazo, promoAtiva, mesesPr
       }
     }
 
+        // Templates novos (uno, duo, triple, elite): remove os blocos inteiros quando não usados
+    if (removerBlocoPromo) {
+      xml = removerGrupoPorNome(xml, 'BLOCO_PROMO');
+      xml = xml.replace('cy="8843800"', 'cy="8229600"');
+    }
+    if (!temContainer) {
+      xml = removerGrupoPorNome(xml, 'BLOCO_MODULAR');
+            // Painel de fundo volta ao tamanho original quando o bloco modular some
+      xml = xml.replace('cy="8843800"', 'cy="8229600"');
+      // Se a promoção continua ativa, sobe o bloco promocional para ocupar o espaço do modular
+      if (!removerBlocoPromo) {
+        const promoY = 'name="BLOCO_PROMO"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="10149840" y="7609360"/>';
+        xml = xml.replace(promoY, promoY.replace('y="6995160"', 'y="6126480"'));
+      }
+    }
 
    // Esvazia o texto do bloco "Período Promocional" quando não estiver ativo (sem remover a estrutura do parágrafo)
     if (removerBlocoPromo && xml.includes('Promocional') && xml.includes('- ' + promoMesTxt)) {
