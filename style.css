@@ -1564,6 +1564,297 @@ box-shadow: none;
 }
 
 /* =============================================
+   SEÇÃO SUPORTE & ATENDIMENTO
+   ============================================= */
+#suporte {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  background: radial-gradient(circle at 50% 0%, rgba(254, 210, 5, 0.08) 0%, rgba(0, 0, 0, 0) 60%), #080808;
+  border-top: 1px solid rgba(254, 210, 5, 0.18);
+  padding: 110px 24px;
+}
+
+.suporte-container {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.suporte-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 52px;
+}
+
+.suporte-tag {
+  display: inline-block;
+  font-family: 'facto', sans-serif;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--amarelo);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.suporte-header h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--branco);
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.suporte-header h2 em {
+  color: var(--amarelo);
+  font-style: italic;
+}
+
+.suporte-subtitulo {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* CARDS DE CONTATO */
+.suporte-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 64px;
+}
+
+.suporte-card {
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.suporte-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(254, 210, 5, 0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(254, 210, 5, 0.15);
+}
+
+.suporte-card-destaque {
+  border-color: rgba(254, 210, 5, 0.35);
+  background: linear-gradient(180deg, rgba(254, 210, 5, 0.04) 0%, #121212 100%);
+}
+
+.suporte-card-icone {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(254, 210, 5, 0.08);
+  border: 1px solid rgba(254, 210, 5, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--amarelo);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.suporte-card:hover .suporte-card-icone {
+  background: rgba(254, 210, 5, 0.2);
+  border-color: var(--amarelo);
+  box-shadow: 0 0 20px rgba(254, 210, 5, 0.45);
+  transform: scale(1.06);
+}
+
+.suporte-card-icone svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.suporte-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.suporte-card-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.suporte-card-valor {
+  font-size: 1.08rem;
+  color: var(--branco);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.suporte-card-action {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--amarelo);
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s ease;
+}
+
+.suporte-card:hover .suporte-card-action {
+  transform: translateX(4px);
+}
+
+.suporte-card-sub {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 6px;
+}
+
+/* FAQ */
+.suporte-faq {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.suporte-faq-titulo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.suporte-faq-titulo h3 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--branco);
+}
+
+.suporte-faq-titulo h3 em {
+  color: var(--amarelo);
+  font-style: italic;
+}
+
+.faq-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-item {
+  border: 1px solid rgba(254, 210, 5, 0.2);
+  border-radius: 10px;
+  background-color: #0e0e0e;
+  overflow: hidden;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.faq-item:hover {
+  border-color: rgba(254, 210, 5, 0.45);
+}
+
+.faq-item.aberto {
+  border-color: rgba(254, 210, 5, 0.7);
+  background-color: #121212;
+}
+
+.faq-pergunta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: none;
+  border: none;
+  color: var(--branco);
+  font-family: 'facto', sans-serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  text-align: left;
+  padding: 22px 24px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.faq-pergunta:hover {
+  color: var(--amarelo);
+}
+
+.faq-icone {
+  flex-shrink: 0;
+  color: var(--amarelo);
+  font-size: 1.4rem;
+  font-weight: 700;
+  transition: transform 0.25s ease;
+}
+
+.faq-item.aberto .faq-icone {
+  transform: rotate(90deg);
+}
+
+.faq-resposta {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.faq-item.aberto .faq-resposta {
+  max-height: 300px;
+}
+
+.faq-resposta p {
+  padding: 0 24px 22px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* RODAPÉ DO SITE */
+#site-footer {
+  background-color: #040404;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 44px 24px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 5;
+}
+
+.site-footer-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  text-align: center;
+}
+
+.site-footer-links {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.site-footer-links a {
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s ease;
+}
+
+.site-footer-links a:hover {
+  color: var(--amarelo);
+}
+
+.site-footer-copy {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* =============================================
    RESPONSIVO — MOBILE
    ============================================= */
 @media (max-width: 768px) {
@@ -1948,4 +2239,29 @@ box-shadow: none;
   align-self: flex-start;
   white-space: nowrap;
 }
+
+  /* SUPORTE MOBILE */
+  #suporte {
+    padding: 64px 20px;
+  }
+
+  .suporte-cards {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+  .suporte-card {
+    padding: 22px 20px;
+  }
+
+  .faq-pergunta {
+    padding: 18px 20px;
+    font-size: 0.95rem;
+  }
+
+  .faq-resposta p {
+    padding: 0 20px 18px;
+    font-size: 0.9rem;
+  }
 }

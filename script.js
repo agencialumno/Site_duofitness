@@ -12,11 +12,13 @@ if (window.innerWidth <= 768) {
 
    /* ---- SCROLL AO TOPO AO CARREGAR ---- */
 window.addEventListener('beforeunload', () => {
-  window.scrollTo(0, 0);
+  if (!window.location.hash) window.scrollTo(0, 0);
 });
 
 history.scrollRestoration = 'manual';
-window.scrollTo(0, 0);
+if (!window.location.hash) {
+  window.scrollTo(0, 0);
+}
 
 /* ---- HERO — efeito zoom out ao scrollar ---- */
 const heroImg = document.querySelector('#hero-imagem img');
@@ -364,3 +366,11 @@ function toggleAccordion(btn) {
   const item = btn.parentElement;
   item.classList.toggle('aberto');
 }
+
+/* ---- FAQ SUPORTE ---- */
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const aberto = item.classList.toggle('aberto');
+  btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+}
+window.toggleFaq = toggleFaq;

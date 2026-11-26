@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suporte e Atendimento | Duo Fitness</title>
+  <meta name="description" content="Suporte e Atendimento Duo Fitness: ajuda com o aplicativo, dúvidas sobre treino, conexão com Apple Saúde e Google Health.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/png" href="../assets/logo/simbolo.png">
+  <link rel="stylesheet" href="../privacidade/legal.css">
+  <style>
+    .suporte-intro {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      margin: 16px 0 32px;
+      color: var(--texto);
+    }
+    .canais-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 28px 0 40px;
+    }
+    .canal-card {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .canal-card:hover {
+      border-color: var(--amarelo);
+      transform: translateY(-2px);
+    }
+    .canal-icone {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: rgba(254, 210, 5, 0.1);
+      border: 1px solid rgba(254, 210, 5, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--amarelo);
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+    .canal-card:hover .canal-icone {
+      background: rgba(254, 210, 5, 0.2);
+      border-color: var(--amarelo);
+      box-shadow: 0 0 16px rgba(254, 210, 5, 0.35);
+      transform: scale(1.05);
+    }
+    .canal-icone svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+    .canal-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--texto-suave);
+    }
+    .canal-valor {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--texto);
+      word-break: break-word;
+    }
+    .canal-acao {
+      font-size: 0.85rem;
+      color: var(--amarelo);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .faq-item {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .faq-pergunta {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: none;
+      border: none;
+      color: var(--texto);
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-align: left;
+      padding: 18px 20px;
+      cursor: pointer;
+    }
+    .faq-pergunta:hover {
+      color: var(--amarelo);
+    }
+    .faq-icone {
+      color: var(--amarelo);
+      font-size: 1.2rem;
+      transition: transform 0.2s ease;
+    }
+    .faq-item.aberto .faq-icone {
+      transform: rotate(90deg);
+    }
+    .faq-resposta {
+      display: none;
+      padding: 0 20px 20px;
+      color: var(--texto-suave);
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+    .faq-item.aberto .faq-resposta {
+      display: block;
+    }
+    .voltar-home {
+      display: inline-block;
+      margin-top: 32px;
+      color: var(--amarelo);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .voltar-home:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="interno">
+    <a href="../" title="Duo Fitness - Início">
+      <img src="../assets/logo/Logo.png" alt="Duo Fitness">
+    </a>
+  </div>
+</header>
+
+<main>
+  <h1>Suporte e Atendimento Duo Fitness</h1>
+  <p class="suporte-intro">Precisa de ajuda com o aplicativo, dúvidas sobre seu treino ou suporte com sua conta? Nossa equipe está pronta para te atender.</p>
+
+  <div class="canais-grid">
+    <a href="mailto:lumno.contato@gmail.com" class="canal-card">
+      <div class="canal-icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+      </div>
+      <span class="canal-label">E-mail de Suporte</span>
+      <strong class="canal-valor">lumno.contato@gmail.com</strong>
+      <span class="canal-acao">Enviar e-mail &rarr;</span>
+    </a>
+
+    <a href="https://wa.me/5521975996032?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20com%20o%20aplicativo%20Duo%20Fitness" target="_blank" rel="noopener noreferrer" class="canal-card">
+      <div class="canal-icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.457h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 00-3.48-8.413z"/>
+        </svg>
+      </div>
+      <span class="canal-label">Atendimento WhatsApp</span>
+      <strong class="canal-valor">+55 21 97599-6032</strong>
+      <span class="canal-acao">Falar no WhatsApp &rarr;</span>
+    </a>
+
+    <div class="canal-card">
+      <div class="canal-icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <span class="canal-label">Horário de Atendimento</span>
+      <strong class="canal-valor">Segunda a Sexta, das 08h às 18h</strong>
+      <span class="canal-label">Horário comercial</span>
+    </div>
+  </div>
+
+  <h2>Dúvidas Frequentes (FAQ)</h2>
+
+  <div class="faq-item aberto">
+    <button type="button" class="faq-pergunta" onclick="toggleFaqItem(this)">
+      <span>Como acesso o aplicativo?</span>
+      <span class="faq-icone">›</span>
+    </button>
+    <div class="faq-resposta">
+      <p>Basta baixar o app Duo Fitness, criar sua conta informando seu condomínio e começar seus treinos personalizados imediatamente.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-pergunta" onclick="toggleFaqItem(this)">
+      <span>Como conectar o Apple Saúde ou Google Health?</span>
+      <span class="faq-icone">›</span>
+    </button>
+    <div class="faq-resposta">
+      <p>Acesse a aba "Saúde" no menu inferior do aplicativo e toque em "Conectar Apple Saúde" (no iPhone) ou "Conectar Google Health" (no Android).</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-pergunta" onclick="toggleFaqItem(this)">
+      <span>Não encontrei meu condomínio na lista, o que fazer?</span>
+      <span class="faq-icone">›</span>
+    </button>
+    <div class="faq-resposta">
+      <p>Novos condomínios são cadastrados pela administração. Entre em contato conosco pelo e-mail ou WhatsApp para verificar a ativação do seu espaço.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button type="button" class="faq-pergunta" onclick="toggleFaqItem(this)">
+      <span>Esqueci minha senha:</span>
+      <span class="faq-icone">›</span>
+    </button>
+    <div class="faq-resposta">
+      <p>Na tela de login do app, toque em "Esqueci minha senha" e informe seu e-mail para receber as instruções de recuperação.</p>
+    </div>
+  </div>
+
+  <p><a href="../" class="voltar-home">&larr; Voltar para a página inicial</a></p>
+</main>
+
+<footer>
+  © Duo Fitness · <a href="../termos/">Termos de Uso</a> · <a href="../privacidade/">Política de Privacidade</a> · <a href="../">duofitnessoficial.com.br</a>
+</footer>
+
+<script>
+  function toggleFaqItem(btn) {
+    const item = btn.closest('.faq-item');
+    item.classList.toggle('aberto');
+  }
+</script>
+
+</body>
+</html>

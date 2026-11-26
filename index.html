@@ -25,7 +25,13 @@
       document.body.style.overflow = ''; // Libera scroll
       splash.style.transition = 'opacity 0.8s ease';
       splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 1000);
+      setTimeout(() => {
+        splash.remove();
+        if (window.location.hash) {
+          const el = document.querySelector(window.location.hash);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 1000);
     }
 
     if (video.ended) {
@@ -363,6 +369,124 @@
     <a href="https://www.instagram.com/duofitness.ofc/" target="_blank" class="btn-cta">Seguir no Instagram</a>
   </div>
 </section>
+
+<!-- SEÇÃO SUPORTE -->
+<section id="suporte">
+  <div class="suporte-container">
+    <div class="suporte-header">
+      <span class="suporte-tag">Atendimento e Ajuda</span>
+      <h2>Suporte e Atendimento <em>Duo Fitness</em></h2>
+      <p class="suporte-subtitulo">Precisa de ajuda com o aplicativo, dúvidas sobre seu treino ou suporte com sua conta? Nossa equipe está pronta para te atender.</p>
+    </div>
+
+    <!-- CANAIS DE ATENDIMENTO -->
+    <div class="suporte-cards">
+      <a href="mailto:lumno.contato@gmail.com" class="suporte-card">
+        <div class="suporte-card-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+          </svg>
+        </div>
+        <div class="suporte-card-info">
+          <span class="suporte-card-label">E-mail de Suporte</span>
+          <strong class="suporte-card-valor">lumno.contato@gmail.com</strong>
+          <span class="suporte-card-action">Enviar e-mail &rarr;</span>
+        </div>
+      </a>
+
+      <a href="https://wa.me/5521975996032?text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20com%20o%20aplicativo%20Duo%20Fitness" target="_blank" rel="noopener noreferrer" class="suporte-card suporte-card-destaque">
+        <div class="suporte-card-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.457h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 00-3.48-8.413z"/>
+          </svg>
+        </div>
+        <div class="suporte-card-info">
+          <span class="suporte-card-label">Atendimento WhatsApp</span>
+          <strong class="suporte-card-valor">+55 21 97599-6032</strong>
+          <span class="suporte-card-action">Falar no WhatsApp &rarr;</span>
+        </div>
+      </a>
+
+      <div class="suporte-card">
+        <div class="suporte-card-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="suporte-card-info">
+          <span class="suporte-card-label">Horário de Atendimento</span>
+          <strong class="suporte-card-valor">Segunda a Sexta, das 08h às 18h</strong>
+          <span class="suporte-card-sub">Horário comercial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DÚVIDAS FREQUENTES (FAQ) -->
+    <div class="suporte-faq">
+      <div class="suporte-faq-titulo">
+        <h3>Dúvidas Frequentes <em>(FAQ)</em></h3>
+      </div>
+      <div class="faq-lista">
+        <div class="faq-item">
+          <button type="button" class="faq-pergunta" onclick="toggleFaq(this)" aria-expanded="false">
+            <span>Como acesso o aplicativo?</span>
+            <span class="faq-icone">›</span>
+          </button>
+          <div class="faq-resposta">
+            <p>Basta baixar o app Duo Fitness, criar sua conta informando seu condomínio e começar seus treinos personalizados imediatamente.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-pergunta" onclick="toggleFaq(this)" aria-expanded="false">
+            <span>Como conectar o Apple Saúde ou Google Health?</span>
+            <span class="faq-icone">›</span>
+          </button>
+          <div class="faq-resposta">
+            <p>Acesse a aba "Saúde" no menu inferior do aplicativo e toque em "Conectar Apple Saúde" (no iPhone) ou "Conectar Google Health" (no Android).</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-pergunta" onclick="toggleFaq(this)" aria-expanded="false">
+            <span>Não encontrei meu condomínio na lista, o que fazer?</span>
+            <span class="faq-icone">›</span>
+          </button>
+          <div class="faq-resposta">
+            <p>Novos condomínios são cadastrados pela administração. Entre em contato conosco pelo e-mail ou WhatsApp para verificar a ativação do seu espaço.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button type="button" class="faq-pergunta" onclick="toggleFaq(this)" aria-expanded="false">
+            <span>Esqueci minha senha:</span>
+            <span class="faq-icone">›</span>
+          </button>
+          <div class="faq-resposta">
+            <p>Na tela de login do app, toque em "Esqueci minha senha" e informe seu e-mail para receber as instruções de recuperação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RODAPÉ -->
+<footer id="site-footer">
+  <div class="site-footer-inner">
+    <p>Duo Fitness — Plataforma de Wellness Residencial · CNPJ 68.340.915/0001-80</p>
+    <div class="site-footer-links">
+      <a href="termos/">Termos de Uso</a>
+      <span>·</span>
+      <a href="privacidade/">Política de Privacidade</a>
+      <span>·</span>
+      <a href="#suporte">Suporte</a>
+    </div>
+    <p class="site-footer-copy">&copy; Duo Fitness. Todos os direitos reservados.</p>
+  </div>
+</footer>
 
 <script src="script.js"></script>
 </body>
